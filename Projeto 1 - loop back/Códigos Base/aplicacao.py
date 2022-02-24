@@ -27,13 +27,13 @@ import time
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411"  # Mac    (variacao de)
-serialName = "COM4"                    # Windows(variacao de)
+serialName = "COM5"                    # Windows(variacao de)
 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
         #para declarar esse objeto é o nome da porta.
-        com1 = enlace('COM4')
+        com1 = enlace('COM5')
         
     
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
@@ -48,8 +48,8 @@ def main():
         
         #txBuffer = imagem em bytes!
     
-        imageR = "imgs/insper.png"
-        imageW = "imgs/insperCopia.png"
+        imageR = "Projeto 1 - loop back/Códigos Base/imgs/insper.png"
+        imageW = "Projeto 1 - loop back/Códigos Base/imgs/insperCopia.png"
         
         txBuffer = open(imageR, 'rb').read()
 
@@ -61,7 +61,7 @@ def main():
         #finalmente vamos transmitir os dados. Para isso usamos a funçao sendData que é um método da camada enlace.
         #faça um print para avisar que a transmissão vai começar.
         print("TRANSMISSÃO VAI COMEÇAR")
-        tempoTi = time.time()
+        
         print("----- Tempo de transmissão iniciado -----")
         #tente entender como o método send funciona!
         #Cuidado! Apenas trasmitimos arrays de bytes! Nao listas!
@@ -69,37 +69,42 @@ def main():
           
   
         #txBuffer = #dados
+        tempoTi = time.time()
         com1.sendData(np.asarray(txBuffer))
-       
+        tempoTf= time.time()
+        print(f"O tempo de transmissão foi de {tempoTf - tempoTi}")
+        print("")
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
         # Tente entender como esse método funciona e o que ele retorna
         txSize = com1.tx.getStatus()
         #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
         #Observe o que faz a rotina dentro do thread RX
         #print um aviso de que a recepção vai começar.
-        tempoTf= time.time()
-        print(f"O tempo de transmissão foi de {tempoTf - tempoTi}")
+       
         print("RECEPÇÃO VAI COMEÇAR")
-        tempoRi= time.time()
+        
         print("----- Tempo de recepção iniciado -----")
-        print("Transformando a imagem em bits para a recepção")
+        #print("Transformando a imagem em bits para a recepção")
         #print(" - {}".format(imgRecebida))
-        print("---------------------------")
+        #print("---------------------------")
         
         #Será que todos os bytes enviados estão realmente guardados? Será que conseguimos verificar?
         #Veja o que faz a funcao do enlaceRX  getBufferLen
 
         #acesso aos bytes recebidos
         txLen = len(txBuffer)
+        tempoRi= time.time()
         rxBuffer, nRx = com1.getData(txLen)
-        print("recebeu {}" .format(rxBuffer))
+        tempoRf= time.time()
+        print(f"O tempo de recepção foi de {tempoRf - tempoRi}")
+        print("")
+        # print("recebeu {}" .format(rxBuffer))
             
         f = open(imageW, 'wb')
         f.write(rxBuffer)
         f.close()
         # Encerra comunicação
-        tempoRf= time.time()
-        print(f"O tempo de recepção foi de {tempoRf - tempoRi}")
+        
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
