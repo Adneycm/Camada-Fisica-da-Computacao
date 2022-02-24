@@ -45,11 +45,6 @@ def main():
         #nome de txBuffer. Essa sempre irá armazenar os dados a serem enviados.
         
         #txBuffer = imagem em bytes!
-    
-        imageR = "Projeto 1 - loop back/Códigos Base/imgs/insper.png"
-        imageW = "Projeto 1 - loop back/Códigos Base/imgs/insperCopia.png"
-        
-        txBuffer = open(imageR, 'rb').read()
 
 
         #faça aqui uma conferência do tamanho do seu txBuffer, ou seja, quantos bytes serão enviados.
@@ -58,20 +53,16 @@ def main():
             
         #finalmente vamos transmitir os dados. Para isso usamos a funçao sendData que é um método da camada enlace.
         #faça um print para avisar que a transmissão vai começar.
-        print("TRANSMISSÃO VAI COMEÇAR")
+        # print("TRANSMISSÃO VAI COMEÇAR")
         
-        print("----- Tempo de transmissão iniciado -----")
+        # print("----- Tempo de transmissão iniciado -----")
         #tente entender como o método send funciona!
         #Cuidado! Apenas trasmitimos arrays de bytes! Nao listas!
           
           
   
         #txBuffer = #dados
-        tempoTi = time.time()
-        com1.sendData(np.asarray(txBuffer))
-        tempoTf= time.time()
-        print(f"O tempo de transmissão foi de {tempoTf - tempoTi}")
-        print("")
+
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
         # Tente entender como esse método funciona e o que ele retorna
         txSize = com1.tx.getStatus()
@@ -90,17 +81,13 @@ def main():
         #Veja o que faz a funcao do enlaceRX  getBufferLen
 
         #acesso aos bytes recebidos
-        txLen = len(txBuffer)
-        tempoRi= time.time()
-        rxBuffer, nRx = com1.getData(txLen)
-        tempoRf= time.time()
-        print(f"O tempo de recepção foi de {tempoRf - tempoRi}")
-        print("")
+        #rxBuffer, nRx = com1.getData(txLen)
+   
         # print("recebeu {}" .format(rxBuffer))
             
-        f = open(imageW, 'wb')
-        f.write(rxBuffer)
-        f.close()
+        #f = open(imageW, 'wb')
+        #f.write(rxBuffer)
+        #f.close()
         # Encerra comunicação
         
         print("-------------------------")

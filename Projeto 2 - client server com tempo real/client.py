@@ -14,13 +14,28 @@ from tracemalloc import stop
 from enlace import *
 import time
 import numpy as np
-
+import random
 import time
 
 # voce deverá descomentar e configurar a porta com através da qual ira fazer comunicaçao
 #   para saber a sua porta, execute no terminal :
 #   python -m serial.tools.list_ports
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
+
+
+# Definindo os comandos a serem enviados
+cmd1 = '00 FF 00 FF'  #(comando de 4 bytes)
+cmd2 = '00 FF FF 00'  #(comando de 4 bytes)
+cmd3 = 'FF 00'        #(comando de 2 bytes)
+cmd4 = '00 FF'        #(comando de 2 bytes) 
+cmd5 = 'FF'           #(comando de 1 byte)
+cmd6 = '00'           #(comando de 1 byte)
+comandos = [cmd1, cmd2, cmd3, cmd4, cmd5, cmd6]
+cmdTr = []
+while len(cmdTr) < 23:
+    cmdTr.append(random.choice(comandos))
+
+print(cmdTr)
 
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
@@ -46,10 +61,7 @@ def main():
         
         #txBuffer = imagem em bytes!
     
-        imageR = "Projeto 1 - loop back/Códigos Base/imgs/insper.png"
-        imageW = "Projeto 1 - loop back/Códigos Base/imgs/insperCopia.png"
-        
-        txBuffer = open(imageR, 'rb').read()
+       
 
 
         #faça aqui uma conferência do tamanho do seu txBuffer, ou seja, quantos bytes serão enviados.
@@ -63,15 +75,11 @@ def main():
         print("----- Tempo de transmissão iniciado -----")
         #tente entender como o método send funciona!
         #Cuidado! Apenas trasmitimos arrays de bytes! Nao listas!
-          
-          
+        # Para diferenciar os comandos nós iremos mandar antes de cada comando a 
+        # quantidade de bytes do comando que será enviado logo em seguida.
+        for i in cmdTr:
+            com1.sendData(np.asarray(cmdTr[i]))
   
-        #txBuffer = #dados
-        tempoTi = time.time()
-        com1.sendData(np.asarray(txBuffer))
-        tempoTf= time.time()
-        print(f"O tempo de transmissão foi de {tempoTf - tempoTi}")
-        print("")
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
         # Tente entender como esse método funciona e o que ele retorna
         txSize = com1.tx.getStatus()
@@ -90,17 +98,17 @@ def main():
         #Veja o que faz a funcao do enlaceRX  getBufferLen
 
         #acesso aos bytes recebidos
-        txLen = len(txBuffer)
+        #txLen = len(txBuffer)
         tempoRi= time.time()
-        rxBuffer, nRx = com1.getData(txLen)
+        #rxBuffer, nRx = com1.getData(txLen)
         tempoRf= time.time()
         print(f"O tempo de recepção foi de {tempoRf - tempoRi}")
         print("")
         # print("recebeu {}" .format(rxBuffer))
             
-        f = open(imageW, 'wb')
-        f.write(rxBuffer)
-        f.close()
+        #f = open(imageW, 'wb')
+        #f.write(rxBuffer)
+        #f.close()
         # Encerra comunicação
         
         print("-------------------------")
