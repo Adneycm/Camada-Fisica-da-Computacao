@@ -57,17 +57,22 @@ def main():
         print("COMUNICAÇÃO ABERTA COM SUCESSO")
 
         print("TRANSMISSÃO VAI COMEÇAR")
-            
+        
+        cmdInt = 'Insper'.encode(encoding='utf-8', errors='strict')
+    
         for i in cmdTr:
-            qtdBytes = sys.getsizeof(i)
 
-            if qtdBytes == 4:
-                com1.sendData(np.asarray(qtdBytes))
-            if qtdBytes == 2:
-                com1.sendData(np.asarray(qtdBytes))
-            if qtdBytes == 1:
-                com1.sendData(np.asarray(qtdBytes))
+            # qtdBytes = sys.getsizeof(i)
+            # if qtdBytes == 4:
+            #     com1.sendData(np.asarray(qtdBytes))
+            # if qtdBytes == 2:
+            #     com1.sendData(np.asarray(qtdBytes))
+            # if qtdBytes == 1:
+            #     com1.sendData(np.asarray(qtdBytes))
+            # ----------------------------------------- #
 
+            
+            com1.sendData(np.asarray(cmdInt))
             com1.sendData(np.asarray(i))
   
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão

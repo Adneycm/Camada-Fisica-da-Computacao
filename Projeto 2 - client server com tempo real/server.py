@@ -43,8 +43,14 @@ def main():
         
         contCmd = 0
         while contCmd < 24:
-            txLen = len(txBuffer)
-            rxBuffer, nRx = com1.getData(txLen)
+            
+            cmdRecebido = rxBuffer.decode("utf-8")
+
+            if cmdRecebido == 'Insper':
+                pass
+            else:
+                txLen = len(rxBuffer)
+                rxBuffer, nRx = com1.getData(txLen)
         
         print("-------------------------")
         print("Comunicação encerrada")
