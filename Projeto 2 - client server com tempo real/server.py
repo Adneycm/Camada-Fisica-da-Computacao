@@ -43,11 +43,11 @@ def main():
 
         contCmd = 0
         while contCmd < 24:
-            n = com1.getData(1)
-            comando = com1.getData(int.from_bytes(n,byteorder="big"))
+            n = com1.getData(2)
+            comando = com1.getData(int.from_bytes(n ,"big"))
             contCmd += 1
             print(f"{contCmd} comandos recebidos")
-            
+
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")

@@ -42,13 +42,13 @@ while len(cmdTr) < 23:
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411"  # Mac    (variacao de)
-serialName = "COM4"                    # Windows(variacao de)
+serialName = "COM5"                    # Windows(variacao de)
 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
         #para declarar esse objeto é o nome da porta.
-        com1 = enlace('COM4')
+        com1 = enlace('COM5')
         
     
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
@@ -57,22 +57,11 @@ def main():
         print("COMUNICAÇÃO ABERTA COM SUCESSO")
 
         print("TRANSMISSÃO VAI COMEÇAR")
-        
-        cmdInt = 'Insper'.encode(encoding='utf-8', errors='strict')
     
         for i in cmdTr:
-
-            # qtdBytes = sys.getsizeof(i)
-            # if qtdBytes == 4:
-            #     com1.sendData(np.asarray(qtdBytes))
-            # if qtdBytes == 2:
-            #     com1.sendData(np.asarray(qtdBytes))
-            # if qtdBytes == 1:
-            #     com1.sendData(np.asarray(qtdBytes))
-            # ----------------------------------------- #
-
-            
-            com1.sendData(np.asarray(cmdInt))
+            # Enviando o len do comando seguinte
+            com1.sendData(np.asarray(len(i)))
+            # Enviando o comando
             com1.sendData(np.asarray(i))
   
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
