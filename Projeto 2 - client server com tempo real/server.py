@@ -25,28 +25,41 @@ import time
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411"  # Mac    (variacao de)
-serialName = "COM4"                    # Windows(variacao de)
+serialName = "COM6"                    # Windows(variacao de)
 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
         #para declarar esse objeto é o nome da porta.
-        com1 = enlace('COM4')
+        com1 = enlace('COM6')
         
     
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
         com1.enable()
+
+        print("esperando 1 byte de sacrifício")        
+        rxBuffer, nRx = com1.getData(1)
+        com1.rx.clearBuffer()
+        time.sleep(.1)
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("COMUNICAÇÃO ABERTA COM SUCESSO")
        
         print("RECEPÇÃO VAI COMEÇAR")
 
+        # Recebendo a quantidade de comandos que será enviado
+        # nCmd = com1.getData(1)
+        # print(nCmd)
+      
         contCmd = 0
-        while contCmd < 24:
-            n = com1.getData(2)
-            comando = com1.getData(int.from_bytes(n ,"big"))
+        while contCmd < 12:
+            n = com1.getData(4)
+            print(n)
+            # comando = com1.getData(n[1])
+            com1.getData(n[1])
+            #print(comando)
             contCmd += 1
             print(f"{contCmd} comandos recebidos")
+
 
         print("-------------------------")
         print("Comunicação encerrada")

@@ -34,10 +34,12 @@ cmd6 = 0x00.to_bytes(1,byteorder="big")        #(comando de 1 byte)
 
 comandos = [cmd1, cmd2, cmd3, cmd4, cmd5, cmd6]
 cmdTr = []
-while len(cmdTr) < 23:
-    cmdTr.append(random.choice(comandos))
-#print(cmdTr)
 
+nCmd = random.randint(10, 30)
+print(f"Serão enviados {nCmd} comandos")
+
+while len(cmdTr) < nCmd:
+    cmdTr.append(random.choice(comandos))
 
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
@@ -50,19 +52,37 @@ def main():
         #para declarar esse objeto é o nome da porta.
         com1 = enlace('COM5')
         
-    
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
         com1.enable()
+
+        time.sleep(.2)
+        print("enviando byte de sacrifício")
+        com1.sendData(b'00')
+        time.sleep(1)
+
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("COMUNICAÇÃO ABERTA COM SUCESSO")
 
         print("TRANSMISSÃO VAI COMEÇAR")
-    
+
+        # Enviando a quantidade de comandos que será enviado
+        print("Enviando quantidade de comandos que serão transmitidos")
+        #com1.sendData(nCmd) # Qtd de comandos
+
+        contCmd = 0
         for i in cmdTr:
             # Enviando o len do comando seguinte
             com1.sendData(np.asarray(len(i)))
+            print(np.asarray(len(i)))
+
+            time.sleep(0.05)
+            
             # Enviando o comando
-            com1.sendData(np.asarray(i))
+            com1.sendData(i)
+            print(i)
+
+            contCmd += 1
+            print(f"{contCmd} comandos enviados")
   
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
         # Tente entender como esse método funciona e o que ele retorna
