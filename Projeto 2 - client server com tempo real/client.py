@@ -36,7 +36,6 @@ comandos = [cmd1, cmd2, cmd3, cmd4, cmd5, cmd6]
 cmdTr = []
 
 nCmd = random.randint(10, 30)
-print(f"Serão enviados {nCmd} comandos")
 
 while len(cmdTr) < nCmd:
     cmdTr.append(random.choice(comandos))
@@ -44,13 +43,13 @@ while len(cmdTr) < nCmd:
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411"  # Mac    (variacao de)
-serialName = "COM5"                    # Windows(variacao de)
+serialName = "COM3"                    # Windows(variacao de)
 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
         #para declarar esse objeto é o nome da porta.
-        com1 = enlace('COM5')
+        com1 = enlace('COM3')
         
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
         com1.enable()
@@ -61,35 +60,45 @@ def main():
         time.sleep(1)
 
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
-        print("COMUNICAÇÃO ABERTA COM SUCESSO")
+        print("COMUNICAÇÃO ABERTA COM SUCESSO\n")
 
-        print("TRANSMISSÃO VAI COMEÇAR")
+        print("TRANSMISSÃO VAI COMEÇAR\n")
 
         # Enviando a quantidade de comandos que será enviado
-        print("Enviando quantidade de comandos que serão transmitidos")
-        #com1.sendData(nCmd) # Qtd de comandos
+        print(f"Serão enviados {nCmd} pacotes de comandos\n")
+        nPacotes = nCmd.to_bytes(2, byteorder="big")
+        com1.sendData(nPacotes)
+        time.sleep(0.05)
 
-        contCmd = 0
         for i in cmdTr:
-            # Enviando o len do comando seguinte
-            com1.sendData(np.asarray(len(i)))
-            print(np.asarray(len(i)))
+            # Tamanho do pacote a ser enviado
+            txBufferLen = len(i)
+
+            # Pacote a ser enviado 
+            txBuffer = i        
+
+            # Transformando o tamanho do pacote a ser enviado em bytes
+            txBufferHeader = txBufferLen.to_bytes(2, byteorder="big") 
+
+            # Enviando o tamanho do pacote em bytes
+            com1.sendData(txBufferHeader)
 
             time.sleep(0.05)
-            
-            # Enviando o comando
-            com1.sendData(i)
-            print(i)
 
-            contCmd += 1
-            print(f"{contCmd} comandos enviados")
-  
-        # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
-        # Tente entender como esse método funciona e o que ele retorna
-        txSize = com1.tx.getStatus()
-        #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
-        #Observe o que faz a rotina dentro do thread RX
-        #print um aviso de que a recepção vai começar.  
+            # Enviando o pacote
+            com1.sendData(txBuffer)
+            print(txBuffer)
+        print("Pacotes enviados!\n")  
+
+        print("Esperando confirmação da quantidade de pacotes recebidos pelo server...\n")
+        nCmdConfirmacao, t = com1.getData(2)
+        nCmdConfirmacaoInt = int.from_bytes(nCmdConfirmacao, "big")
+        
+        if nCmdConfirmacaoInt == nCmd:
+            print("Quantidade de pacotes recebidos é IGUAL a enviada :)")
+        else:
+            print("Quantidade de pacotes recebidos é DIVERGENTE da enviada :(")
+        
         
         print("-------------------------")
         print("Comunicação encerrada")
@@ -105,4 +114,3 @@ def main():
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
     main()
-

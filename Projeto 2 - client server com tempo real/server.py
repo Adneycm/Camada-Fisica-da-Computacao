@@ -25,13 +25,13 @@ import time
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411"  # Mac    (variacao de)
-serialName = "COM6"                    # Windows(variacao de)
+serialName = "COM4"                    # Windows(variacao de)
 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
         #para declarar esse objeto é o nome da porta.
-        com1 = enlace('COM6')
+        com1 = enlace('COM4')
         
     
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
@@ -42,23 +42,34 @@ def main():
         com1.rx.clearBuffer()
         time.sleep(.1)
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
-        print("COMUNICAÇÃO ABERTA COM SUCESSO")
+        print("COMUNICAÇÃO ABERTA COM SUCESSO\n")
        
-        print("RECEPÇÃO VAI COMEÇAR")
+        print("RECEPÇÃO VAI COMEÇAR\n")
 
         # Recebendo a quantidade de comandos que será enviado
-        # nCmd = com1.getData(1)
-        # print(nCmd)
-      
-        contCmd = 0
-        while contCmd < 12:
-            n = com1.getData(4)
-            print(n)
-            # comando = com1.getData(n[1])
-            com1.getData(n[1])
-            #print(comando)
-            contCmd += 1
-            print(f"{contCmd} comandos recebidos")
+        nCmd, t = com1.getData(2)
+        nCmdInt = int.from_bytes(nCmd, "big")
+        print(f"Serão recebidos {nCmdInt} pacotes de comandos\n")
+        
+        x = 0
+        while x < nCmdInt:
+            # Recebendo o tamanho do pacote
+            rxBufferHeader, rxHeaderLen = com1.getData(2)
+
+            # Transformando o tamanho do pacote em um inteiro
+            rxBufferResponse = int.from_bytes(rxBufferHeader, "big")
+            
+            # Recebendo o pacote
+            rxBuffer, rxBufferLen = com1.getData(rxBufferResponse)
+            print(rxBuffer)
+            
+            x += 1
+        print("Pacotes recebidos!\n")
+
+        # Retornando quantidade de pacotes recebidos para o client
+        print("Enviando a quantidade de pacotes recebidos ao client para confirmação\n")
+        com1.sendData(nCmd)
+    
 
 
         print("-------------------------")
