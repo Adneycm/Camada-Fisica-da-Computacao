@@ -58,17 +58,20 @@ def main():
 
             # Transformando o tamanho do pacote em um inteiro
             rxBufferResponse = int.from_bytes(rxBufferHeader, "big")
-            
+
             # Recebendo o pacote
             rxBuffer, rxBufferLen = com1.getData(rxBufferResponse)
-            print(rxBuffer)
-            
+
             x += 1
+
         print("Pacotes recebidos!\n")
 
         # Retornando quantidade de pacotes recebidos para o client
         print("Enviando a quantidade de pacotes recebidos ao client para confirmação\n")
         com1.sendData(nCmd)
+        #z = 5
+        # = z.to_bytes(2, byteorder="big")
+        #com1.sendData(y)
     
 
 

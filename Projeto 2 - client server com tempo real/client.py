@@ -23,7 +23,6 @@ import sys
 #   python -m serial.tools.list_ports
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
-
 # Definindo os comandos a serem enviados
 cmd1 = 0x00FF00FF.to_bytes(4,byteorder="big")  #(comando de 4 bytes)
 cmd2 = 0x00FFFF00.to_bytes(4,byteorder="big")  #(comando de 4 bytes)
@@ -83,22 +82,27 @@ def main():
             # Enviando o tamanho do pacote em bytes
             com1.sendData(txBufferHeader)
 
-            time.sleep(0.05)
+            time.sleep(.05)
 
             # Enviando o pacote
             com1.sendData(txBuffer)
-            print(txBuffer)
+
+            time.sleep(.05)
+            
         print("Pacotes enviados!\n")  
 
         print("Esperando confirmação da quantidade de pacotes recebidos pelo server...\n")
-        nCmdConfirmacao, t = com1.getData(2)
-        nCmdConfirmacaoInt = int.from_bytes(nCmdConfirmacao, "big")
-        
-        if nCmdConfirmacaoInt == nCmd:
-            print("Quantidade de pacotes recebidos é IGUAL a enviada :)")
-        else:
-            print("Quantidade de pacotes recebidos é DIVERGENTE da enviada :(")
-        
+        try:
+            nCmdConfirmacao, t = com1.getData(2)
+            nCmdConfirmacaoInt = int.from_bytes(nCmdConfirmacao, "big") 
+
+            if nCmdConfirmacaoInt == nCmd:
+                print("Quantidade de pacotes recebidos é IGUAL a enviada :)")
+            else:
+                print("Quantidade de pacotes recebidos é DIVERGENTE da enviada :(")  
+        except:
+            print("Time Out: mensagem de confirmação não recebida!")     
+
         
         print("-------------------------")
         print("Comunicação encerrada")
