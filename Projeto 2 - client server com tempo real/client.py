@@ -67,7 +67,7 @@ def main():
         print(f"Serão enviados {nCmd} pacotes de comandos\n")
         nPacotes = nCmd.to_bytes(2, byteorder="big")
         com1.sendData(nPacotes)
-        time.sleep(0.05)
+        time.sleep(.05)
 
         for i in cmdTr:
             # Tamanho do pacote a ser enviado

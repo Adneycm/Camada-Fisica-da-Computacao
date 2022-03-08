@@ -37,14 +37,20 @@ def main():
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
         com1.enable()
 
-        print("esperando 1 byte de sacrifício")        
-        rxBuffer, nRx = com1.getData(1)
-        com1.rx.clearBuffer()
-        time.sleep(.1)
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("COMUNICAÇÃO ABERTA COM SUCESSO\n")
        
         print("RECEPÇÃO VAI COMEÇAR\n")
+
+        # HANDSHAKE
+        print("Esperando Handshake...\n")
+        rxBuffer, nRx = com1.getData(2)
+        print(rxBuffer)
+        time.sleep(.1)
+        print("Enviando retorno...\n")
+        com1.sendData(rxBuffer)
+        time.sleep(.05)
+        print("Handshake enviado!")
 
 
         print("-------------------------")
