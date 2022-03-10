@@ -65,8 +65,8 @@ def main():
             # * Recebendo HEAD
             HeadBytes, HeadBytes_len = com1.getData(10)
             nPacote = int.from_bytes(HeadBytes[0:5], "big") # Número do pacote
-            lenPacote = int.from_bytes(HeadBytes[6:10], "big") # Tamanho do pacote
-            print(f"número do pacote: {nPacote}\n tamanho do pacote {lenPacote}\n")
+            lenPacote = int.from_bytes(HeadBytes[5:10], "big") # Tamanho do pacote
+            print(f"número do pacote: {nPacote}\ntamanho do pacote {lenPacote}\n")
 
             # * Recebendo PayLoad
             pacote, lenPacote = com1.getData(lenPacote) # Pacote
@@ -74,10 +74,8 @@ def main():
 
             contPacotes +=1
 
-
-
-        pathImageTx = "Projeto 3 - datagrama/Imagens/rxImage.png"
-        f = open(pathImageTx, 'wb')
+        pathImageRx = "Camada-Fisica-da-Computacao/Projeto 3 - datagrama/Imagens/rxImage.png"
+        f = open(pathImageRx, 'wb')
         f.write(ImageRx)
         f.close()
 

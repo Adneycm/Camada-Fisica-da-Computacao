@@ -122,11 +122,11 @@ def main():
             tamPacote = (len(payloads[contPacotes])).to_bytes(5, byteorder="big") # Tamanho do pacote
             com1.sendData(numPacote + tamPacote)
             print((contPacotes+1), len(payloads[contPacotes]))
-            time.sleep(.05)
+            time.sleep(1)
 
             # * Enviando PayLoad
             com1.sendData(payloads[contPacotes]) # Pacote
-            time.sleep(.05)
+            time.sleep(1)
 
 
             contPacotes += 1
