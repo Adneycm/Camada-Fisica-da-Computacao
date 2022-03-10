@@ -17,6 +17,7 @@ import numpy as np
 import random
 import time
 import sys
+import math
 
 # voce deverá descomentar e configurar a porta com através da qual ira fazer comunicaçao
 #   para saber a sua porta, execute no terminal :
@@ -76,29 +77,58 @@ def main():
            lenta. Tem-se, portanto um cuidado entre segurança e velocidade da infor-
            mação que precisa ser tomado."""
 
-        # ! Organização da transmissão
-        """Nós iremos transmitir uma imagem 32x32 medido em pixels, o que é equivalente
-           a 2048 bytes. Nós iremos portanto, fracionar essa imagem em pacotes de envio
-           que serão compostos pelo HEAD, PayLoad e EOP (End Of Package). A organização
-           do tamanho do pacote será feita da seguinte maneira:
+        # * Organização da transmissão
+        """Nós iremos transmitir uma imagem portanto, fracionar essa imagem em pacotes de envio
+           que serão compostos pelo HEAD, PayLoad e EOP (End Of Package) é necessário para
+           garantir a confiabilidade da mensagem e evitar problemas como descrito no tópico de 
+           fragmentação. A organização do tamanho do pacote será feita da seguinte maneira:
            --> HEAD: 10 bytes
            --> PayLoad: 114 bytes
            --> EOP: 4 bytes
-           Totalizando assim 128 bytes. Dividindo 2048 bytes por 128 bytes, nós teremos
-           16 pacotes para serem enviados para o server."""
+           Totalizando assim 128 bytes. Devemos portanto dividir o tamanho da nossa imagem nesses
+           pacotese enviá-los sequencialmente."""
 
-        print("Vamos iniciar o envio da imagem pacote por pacote!\n")
+        
         # Pegando o caminho da imagem a ser transmitida
-        imageTx = "image.png"
-    
+        pathImageTx = "Projeto 3 - datagrama/Imagens/txImage.png"
+        # Agora vamos abrir o arquivo da imagem e lê-lo com um arquivo binário
+        ImageTx = open(pathImageTx, 'rb').read()
+        # Vamos agora saber o tamanho da imagem em número inteiro e em bytes
+        lenImage = len(ImageTx)
+        lenImageTxBytes = lenImage.to_bytes(2, byteorder="big") 
+        # Agora que temos o tamanho da imagem nós podemos saber quantos pacotes serão enviados
+        nPacotes = math.ceil(lenImage/128)
+        nPacotesBytes = nPacotes.to_bytes(2, byteorder="big")
+
+        # Mandando a quantidade de pacotes que serão enviados para o server
+        print("Enviando quantidade de pacotes que serão enviados\n")
+        com1.sendData(nPacotesBytes)
+
+        # Para saber o tamanho de cada pacote nós iremos dividir o tamanho da mensagem completa
+        # por 128 (tamanho máximo do pacote) e pegaremo o resto dessa divisão que será o tamanho
+        # do último pacote a ser enviado.
+        nPacotesFloor = math.floor(lenImage/128)
+        lenPacotes = nPacotesFloor*[128]
+        lenPacotes.append( (lenImage/128) - nPacotesFloor )
+        # Transformando o tamanho dos pacotes em bytes para a transmissão
+        for i in lenPacotes:
+            i = i.to_bytes(2, byteorder="big")
 
 
-           
-        
+        # ! Vamos criar um LOOP para enviarmos sequencialmente o Head, PayLoad e EOP de cada pacote
+        contPacotes = 0
+        while contPacotes < nPacotes:
+            print(f"Enviando informações do {contPacotes+1} do pacote\n")
 
-        
+            # * Enviando HEAD
+            com1.sendData((contPacotes+1).to_bytes(2, byteorder="big")) # Número do pacote
+            time.sleep(.05)
+            com1.sendData(lenPacotes[contPacotes])  # Tamanho do pacote
+            time.sleep(.05)
 
-        
+            # * Enviando PayLoad
+
+            contPacotes += 1
 
         
         print("-------------------------")

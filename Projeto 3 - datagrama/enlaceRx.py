@@ -73,7 +73,7 @@ class RX(object):
             time.sleep(0.05)
             tempoF = time.time()
             if (tempoF - tempoI) >= 5:
-                return input("Tempo de 5 segundos excedido :(\n Deseja tentar novamente? (S/N)")                
+                return input("Tempo de 5 segundos excedido :(\n Deseja tentar novamente? (S/N)\n")                
         return(self.getBuffer(size))
 
     # def getNData(self, size):

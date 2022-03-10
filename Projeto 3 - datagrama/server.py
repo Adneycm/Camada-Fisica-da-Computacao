@@ -42,15 +42,36 @@ def main():
        
         print("RECEPÇÃO VAI COMEÇAR\n")
 
-        # HANDSHAKE
+        # * HANDSHAKE
         print("Esperando Handshake...\n")
         rxBuffer, nRx = com1.getData(2)
-        print(rxBuffer)
         time.sleep(.1)
         print("Enviando retorno...\n")
         com1.sendData(rxBuffer)
         time.sleep(.05)
-        print("Handshake enviado!")
+        print("Handshake enviado!\n")
+
+        # Recebendo a quantidade de pacotes que serão enviados pelo client
+        nPacotesBytes, nPacotesBytes_len = com1.getData(2)
+        nPacotes = int.from_bytes(nPacotesBytes, "big")
+        print(f"Serão enviados {nPacotes} pacotes\n")
+
+        # ! Vamos criar um LOOP para recebermos sequencialmente o Head, PayLoad e EOP de cada pacote
+        contPacotes = 0
+        while contPacotes < nPacotes:
+            print(f"Recebendo informações do {contPacotes+1} do pacote\n")
+
+            # * Recebendo HEAD
+            nPacoteBytes, nPacoteByte_len = com1.getData(2) # Número do pacote
+            nPacote = int.from_bytes(nPacoteBytes, "big")
+            print(f"pacote {nPacote}")
+            lenPacoteBytes, lenPacoteByte = com1.getData(2)  # Tamanho do pacote
+            lenPacote = int.from_bytes(lenPacoteBytes, "big")
+            print(f"tamanho do pacote {lenPacoteBytes}")
+
+            contPacotes +=1
+
+            # * Recebendo PayLoad
 
 
         print("-------------------------")
