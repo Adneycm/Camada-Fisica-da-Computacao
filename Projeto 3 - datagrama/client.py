@@ -93,6 +93,7 @@ def main():
         pathImageTx = "Projeto 3 - datagrama/Imagens/txImage.png"
         # Agora vamos abrir o arquivo da imagem e lê-lo com um arquivo binário
         ImageTx = open(pathImageTx, 'rb').read()
+        print(ImageTx)
         # Vamos agora saber o tamanho da imagem em número inteiro e em bytes
         lenImage = len(ImageTx)
         lenImageTxBytes = lenImage.to_bytes(2, byteorder="big") 

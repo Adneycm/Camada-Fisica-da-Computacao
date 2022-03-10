@@ -58,7 +58,7 @@ def main():
 
         # ! Vamos criar um LOOP para recebermos sequencialmente o Head, PayLoad e EOP de cada pacote
         contPacotes = 0
-        ImageRx = []
+        ImageRx = b'00'
         while contPacotes < nPacotes:
             print(f"Recebendo informações do {contPacotes+1} do pacote")
 
@@ -70,16 +70,16 @@ def main():
 
             # * Recebendo PayLoad
             pacote, lenPacote = com1.getData(lenPacote) # Pacote
-            ImageRx.append(pacote)
+            ImageRx += pacote
 
             contPacotes +=1
 
-        pathImageRx = "Camada-Fisica-da-Computacao/Projeto 3 - datagrama/Imagens/rxImage.png"
+        pathImageRx = "rxImage.png"
         f = open(pathImageRx, 'wb')
-        f.write(ImageRx)
+        f.write(ImageRx[1:len(ImageRx)])
         f.close()
 
-
+        print(ImageRx)
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
