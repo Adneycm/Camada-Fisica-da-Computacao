@@ -63,21 +63,14 @@ def main():
             print(f"Recebendo informações do {contPacotes+1} do pacote")
 
             # * Recebendo HEAD
-            nPacoteBytes, nPacoteByte_len = com1.getData(5) # Número do pacote
-            nPacote = int.from_bytes(nPacoteBytes, "big")
-            print(f"pacote {nPacote}")
-            time.sleep(.05)
-
-            lenPacoteBytes, lenPacoteByte = com1.getData(5)  # Tamanho do pacote
-            lenPacote = int.from_bytes(lenPacoteBytes, "big")
-            print(f"tamanho do pacote {lenPacote}\n")
-            time.sleep(.05)
+            HeadBytes, HeadBytes_len = com1.getData(10)
+            nPacote = int.from_bytes(HeadBytes[0:5], "big") # Número do pacote
+            lenPacote = int.from_bytes(HeadBytes[6:10], "big") # Tamanho do pacote
+            print(f"número do pacote: {nPacote}\n tamanho do pacote {lenPacote}\n")
 
             # * Recebendo PayLoad
             pacote, lenPacote = com1.getData(lenPacote) # Pacote
             ImageRx.append(pacote)
-            time.sleep(.05)
-
 
             contPacotes +=1
 

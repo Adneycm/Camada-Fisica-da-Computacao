@@ -118,12 +118,10 @@ def main():
             print(f"Enviando informações do {contPacotes+1} do pacote")
 
             # * Enviando HEAD
-            com1.sendData((contPacotes+1).to_bytes(5, byteorder="big")) # Número do pacote
-            print(contPacotes+1)
-            time.sleep(.05)
-            com1.sendData((len(payloads[contPacotes])).to_bytes(5, byteorder="big")) # Tamanho do pacote
-            print(lenPayloads[contPacotes])
-            print('')
+            numPacote = (contPacotes+1).to_bytes(5, byteorder="big") # Número do pacote
+            tamPacote = (len(payloads[contPacotes])).to_bytes(5, byteorder="big") # Tamanho do pacote
+            com1.sendData(numPacote + tamPacote)
+            print((contPacotes+1), len(payloads[contPacotes]))
             time.sleep(.05)
 
             # * Enviando PayLoad
