@@ -97,36 +97,39 @@ def main():
         lenImage = len(ImageTx)
         lenImageTxBytes = lenImage.to_bytes(2, byteorder="big") 
         # Agora que temos o tamanho da imagem nós podemos saber quantos pacotes serão enviados
-        nPacotes = math.ceil(lenImage/128)
+        nPacotes = math.ceil(lenImage/114)
         nPacotesBytes = nPacotes.to_bytes(2, byteorder="big")
 
         # Mandando a quantidade de pacotes que serão enviados para o server
-        print("Enviando quantidade de pacotes que serão enviados\n")
+        print(f"Enviando quantidade de pacotes que serão enviados {nPacotes}\n")
         com1.sendData(nPacotesBytes)
 
-        # Para saber o tamanho de cada pacote nós iremos dividir o tamanho da mensagem completa
-        # por 128 (tamanho máximo do pacote) e pegaremo o resto dessa divisão que será o tamanho
-        # do último pacote a ser enviado.
-        nPacotesFloor = math.floor(lenImage/128)
-        lenPacotes = nPacotesFloor*[128]
-        lenPacotes.append( (lenImage/128) - nPacotesFloor )
-        # Transformando o tamanho dos pacotes em bytes para a transmissão
-        for i in lenPacotes:
-            i = i.to_bytes(2, byteorder="big")
-
+        # Criando lista de payloads para serem enviados
+        payloads = [ImageTx[i:i + 114] for i in range(0, len(ImageTx), 114)]
+        lenPayloads = []
+        for i in payloads:
+            lenPayloads.append(len(i))
+        print(lenPayloads)
+            
 
         # ! Vamos criar um LOOP para enviarmos sequencialmente o Head, PayLoad e EOP de cada pacote
         contPacotes = 0
         while contPacotes < nPacotes:
-            print(f"Enviando informações do {contPacotes+1} do pacote\n")
+            print(f"Enviando informações do {contPacotes+1} do pacote")
 
             # * Enviando HEAD
-            com1.sendData((contPacotes+1).to_bytes(2, byteorder="big")) # Número do pacote
+            com1.sendData((contPacotes+1).to_bytes(5, byteorder="big")) # Número do pacote
+            print(contPacotes+1)
             time.sleep(.05)
-            com1.sendData(lenPacotes[contPacotes])  # Tamanho do pacote
+            com1.sendData((len(payloads[contPacotes])).to_bytes(5, byteorder="big")) # Tamanho do pacote
+            print(lenPayloads[contPacotes])
+            print('')
             time.sleep(.05)
 
             # * Enviando PayLoad
+            com1.sendData(payloads[contPacotes]) # Pacote
+            time.sleep(.05)
+
 
             contPacotes += 1
 

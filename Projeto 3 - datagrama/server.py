@@ -58,20 +58,35 @@ def main():
 
         # ! Vamos criar um LOOP para recebermos sequencialmente o Head, PayLoad e EOP de cada pacote
         contPacotes = 0
+        ImageRx = []
         while contPacotes < nPacotes:
-            print(f"Recebendo informações do {contPacotes+1} do pacote\n")
+            print(f"Recebendo informações do {contPacotes+1} do pacote")
 
             # * Recebendo HEAD
-            nPacoteBytes, nPacoteByte_len = com1.getData(2) # Número do pacote
+            nPacoteBytes, nPacoteByte_len = com1.getData(5) # Número do pacote
             nPacote = int.from_bytes(nPacoteBytes, "big")
             print(f"pacote {nPacote}")
-            lenPacoteBytes, lenPacoteByte = com1.getData(2)  # Tamanho do pacote
+            time.sleep(.05)
+
+            lenPacoteBytes, lenPacoteByte = com1.getData(5)  # Tamanho do pacote
             lenPacote = int.from_bytes(lenPacoteBytes, "big")
-            print(f"tamanho do pacote {lenPacoteBytes}")
+            print(f"tamanho do pacote {lenPacote}\n")
+            time.sleep(.05)
+
+            # * Recebendo PayLoad
+            pacote, lenPacote = com1.getData(lenPacote) # Pacote
+            ImageRx.append(pacote)
+            time.sleep(.05)
+
 
             contPacotes +=1
 
-            # * Recebendo PayLoad
+
+
+        pathImageTx = "Projeto 3 - datagrama/Imagens/rxImage.png"
+        f = open(pathImageTx, 'wb')
+        f.write(ImageRx)
+        f.close()
 
 
         print("-------------------------")
