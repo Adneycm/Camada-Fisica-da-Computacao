@@ -100,14 +100,10 @@ def main():
         # Mandando a quantidade de pacotes que serão enviados para o server
         print(f"Enviando quantidade de pacotes que serão enviados {nPacotes}\n")
         com1.sendData(nPacotesBytes)
+        time.sleep(1)
 
         # Criando lista de payloads para serem enviados
         payloads = [ImageTx[i:i + 114] for i in range(0, len(ImageTx), 114)]
-        lenPayloads = []
-        for i in payloads:
-            lenPayloads.append(len(i))
-        print(lenPayloads)
-            
 
         # ! Vamos criar um LOOP para enviarmos sequencialmente o Head, PayLoad e EOP de cada pacote
         contPacotes = 0
@@ -125,8 +121,14 @@ def main():
             com1.sendData(payloads[contPacotes]) # Pacote
             time.sleep(1)
 
+            # Recebendo confirmação se o pacote foi enviado corretamente
+            confirmacao, confrimacaoLen = com1.getData(2)
 
-            contPacotes += 1
+            if confirmacao == b'00':
+                contPacotes += 2
+            else:
+                contPacotes = int.from_bytes(confirmacao, "big") - 1
+                print(contPacotes)
 
         
         print("-------------------------")

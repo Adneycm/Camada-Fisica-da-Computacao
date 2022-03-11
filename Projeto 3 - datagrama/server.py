@@ -60,24 +60,28 @@ def main():
         contPacotes = 0
         ImageRx = b'00'
         while contPacotes < nPacotes:
-            print(f"Recebendo informações do {contPacotes+1} do pacote")
+            print(f"Recebendo informações do pacote {contPacotes+1}")
 
             # * Recebendo HEAD
             HeadBytes, HeadBytes_len = com1.getData(10)
             nPacote = int.from_bytes(HeadBytes[0:5], "big") # Número do pacote
             lenPacote = int.from_bytes(HeadBytes[5:10], "big") # Tamanho do pacote
-            print(f"número do pacote: {nPacote}\ntamanho do pacote {lenPacote}\n")
+            print(f"número do pacote: {nPacote}\ntamanho do pacote {lenPacote}")
 
             if nPacote == contPacotes+1:
                 # * Recebendo PayLoad
                 pacote, lenPacote = com1.getData(lenPacote) # Pacote
                 ImageRx += pacote
-                contPacotes +=1
                 # Enviando confirmação de que está tudo certo com o pacote
-                
+                com1.sendData(b'00')
+                time.sleep(1)
+                contPacotes +=1
             else:
-                print(f"A ordem do pacote está errada! Por favor envie o pacote {contPacotes+1}")
+                print(f"A ordem do pacote está errada! Por favor envie o pacote {contPacotes+1}\n")
                 # Enviando mensagem pedindo o reenvio do pacote correto
+                pacoteCerto = (contPacotes+1).to_bytes(2, byteorder="big")
+                com1.sendData(pacoteCerto)
+                time.sleep(1)
 
 
         pathImageRx = "Imagens/rxImage.png"
