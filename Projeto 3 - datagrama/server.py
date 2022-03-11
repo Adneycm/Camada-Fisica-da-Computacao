@@ -68,11 +68,17 @@ def main():
             lenPacote = int.from_bytes(HeadBytes[5:10], "big") # Tamanho do pacote
             print(f"número do pacote: {nPacote}\ntamanho do pacote {lenPacote}\n")
 
-            # * Recebendo PayLoad
-            pacote, lenPacote = com1.getData(lenPacote) # Pacote
-            ImageRx += pacote
+            if nPacote == contPacotes+1:
+                # * Recebendo PayLoad
+                pacote, lenPacote = com1.getData(lenPacote) # Pacote
+                ImageRx += pacote
+                contPacotes +=1
+                # Enviando confirmação de que está tudo certo com o pacote
+                
+            else:
+                print(f"A ordem do pacote está errada! Por favor envie o pacote {contPacotes+1}")
+                # Enviando mensagem pedindo o reenvio do pacote correto
 
-            contPacotes +=1
 
         pathImageRx = "Imagens/rxImage.png"
         print(ImageRx[2:len(ImageRx)])
