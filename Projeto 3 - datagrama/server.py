@@ -74,12 +74,12 @@ def main():
 
             contPacotes +=1
 
-        pathImageRx = "rxImage.png"
+        pathImageRx = "Imagens/rxImage.png"
+        print(ImageRx[2:len(ImageRx)])
         f = open(pathImageRx, 'wb')
-        f.write(ImageRx[1:len(ImageRx)])
+        f.write(ImageRx[2:len(ImageRx)+1])
         f.close()
 
-        print(ImageRx)
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
