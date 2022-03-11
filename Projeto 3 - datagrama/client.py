@@ -110,24 +110,31 @@ def main():
         while contPacotes < nPacotes:
             print(f"Enviando informações do {contPacotes+1} do pacote")
 
-            # * Enviando HEAD
-            numPacote = (contPacotes+1).to_bytes(5, byteorder="big") # Número do pacote
-            tamPacote = (len(payloads[contPacotes])).to_bytes(5, byteorder="big") # Tamanho do pacote
-            com1.sendData(numPacote + tamPacote)
-            print((contPacotes+1), len(payloads[contPacotes]))
-            time.sleep(1)
+            # * HEAD
+            nPacote = (contPacotes+1).to_bytes(5, byteorder="big") # Número do pacote
+            tamPayload = (len(payloads[contPacotes])).to_bytes(5, byteorder="big") # Tamanho do pacote
+            HEAD = nPacote + tamPayload
 
-            # * Enviando PayLoad
-            com1.sendData(payloads[contPacotes]) # Pacote
+            # * PayLoad
+            payload = payloads[contPacotes] # Pacote
+
+            # * EOP
+            EOP = b'0'
+            
+            tamanhoPacote = (len(HEAD + payload + EOP)).to_bytes(2,byteorder="big")
+            com1.sendData(tamanhoPacote)
+            time.sleep(1)
+            com1.sendData(HEAD + payload + EOP)
             time.sleep(1)
 
             # Recebendo confirmação se o pacote foi enviado corretamente
             confirmacao, confrimacaoLen = com1.getData(2)
 
             if confirmacao == b'00':
-                contPacotes += 2
+                contPacotes += 1
             else:
                 contPacotes = int.from_bytes(confirmacao, "big") - 1
+                print(f"Precisamos reenviar o pacote {contPacotes}")
                 print(contPacotes)
 
         

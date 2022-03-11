@@ -62,16 +62,32 @@ def main():
         while contPacotes < nPacotes:
             print(f"Recebendo informações do pacote {contPacotes+1}")
 
-            # * Recebendo HEAD
-            HeadBytes, HeadBytes_len = com1.getData(10)
-            nPacote = int.from_bytes(HeadBytes[0:5], "big") # Número do pacote
-            lenPacote = int.from_bytes(HeadBytes[5:10], "big") # Tamanho do pacote
-            print(f"número do pacote: {nPacote}\ntamanho do pacote {lenPacote}")
+            # * Recebendo Tamanho do pacote
+            pacoteBytes, pacoteLenBytes = com1.getData(2)
+            tamanhoPacote = int.from_bytes(pacoteBytes, "big")
+
+            # * Recebendo pacote
+            pacote, lenPacote = com1.getData(tamanhoPacote)
+            # HEAD
+            print('oi')
+            nPacote = pacote[0:5]
+            nPacote = int.from_bytes(nPacote, "big")
+            tamPayload = pacote[5:10]
+            tamPayload = int.from_bytes(tamPayload, "big")
+
+            # PayLoad
+            print('oi2')
+            payload = pacote[10:tamPayload + 10]
+
+            # EOP
+            print('oi3')
+            EOP = pacote[tamPayload + 10:len(pacote)]
+            print('oi4')
+
 
             if nPacote == contPacotes+1:
                 # * Recebendo PayLoad
-                pacote, lenPacote = com1.getData(lenPacote) # Pacote
-                ImageRx += pacote
+                ImageRx += payload
                 # Enviando confirmação de que está tudo certo com o pacote
                 com1.sendData(b'00')
                 time.sleep(1)
