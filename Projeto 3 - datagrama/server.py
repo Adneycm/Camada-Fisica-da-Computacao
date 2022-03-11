@@ -8,6 +8,7 @@
 #para acompanhar a execução e identificar erros, construa prints ao longo do código! 
 
 
+from re import X
 from tracemalloc import stop
 
 
@@ -44,12 +45,12 @@ def main():
 
         # * HANDSHAKE
         print("Esperando Handshake...\n")
-        rxBuffer, nRx = com1.getData(2)
-        time.sleep(.1)
+        handShake, lenHS = com1.getData(2)
         print("Enviando retorno...\n")
-        com1.sendData(rxBuffer)
+        com1.sendData(handShake)
         time.sleep(.05)
         print("Handshake enviado!\n")
+        
 
         # Recebendo a quantidade de pacotes que serão enviados pelo client
         nPacotesBytes, nPacotesBytes_len = com1.getData(2)
@@ -69,20 +70,12 @@ def main():
             # * Recebendo pacote
             pacote, lenPacote = com1.getData(tamanhoPacote)
             # HEAD
-            print('oi')
-            nPacote = pacote[0:5]
-            nPacote = int.from_bytes(nPacote, "big")
-            tamPayload = pacote[5:10]
-            tamPayload = int.from_bytes(tamPayload, "big")
-
+            nPacote = int.from_bytes(pacote[0:5], "big")
+            tamPayload = int.from_bytes(pacote[5:10], "big")
             # PayLoad
-            print('oi2')
             payload = pacote[10:tamPayload + 10]
-
             # EOP
-            print('oi3')
             EOP = pacote[tamPayload + 10:len(pacote)]
-            print('oi4')
 
 
             if nPacote == contPacotes+1:

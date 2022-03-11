@@ -52,7 +52,8 @@ def main():
                 continue
             if rxBuffer == 'N':
                 print("Interrompendo comunicação\n")
-                break
+                com1.disable()
+                sys.exit('fefef')
             else:
                 com1.rx.clearBuffer()
                 time.sleep(.1)
@@ -98,7 +99,7 @@ def main():
         nPacotesBytes = nPacotes.to_bytes(2, byteorder="big")
 
         # Mandando a quantidade de pacotes que serão enviados para o server
-        print(f"Enviando quantidade de pacotes que serão enviados {nPacotes}\n")
+        print(f"A quantidade de pacotes que serão enviados é {nPacotes}\n")
         com1.sendData(nPacotesBytes)
         time.sleep(1)
 
@@ -108,16 +109,14 @@ def main():
         # ! Vamos criar um LOOP para enviarmos sequencialmente o Head, PayLoad e EOP de cada pacote
         contPacotes = 0
         while contPacotes < nPacotes:
-            print(f"Enviando informações do {contPacotes+1} do pacote")
+            print(f"Enviando informações do pacote {contPacotes+1}")
 
             # * HEAD
             nPacote = (contPacotes+1).to_bytes(5, byteorder="big") # Número do pacote
             tamPayload = (len(payloads[contPacotes])).to_bytes(5, byteorder="big") # Tamanho do pacote
             HEAD = nPacote + tamPayload
-
             # * PayLoad
             payload = payloads[contPacotes] # Pacote
-
             # * EOP
             EOP = b'0'
             
@@ -131,10 +130,12 @@ def main():
             confirmacao, confrimacaoLen = com1.getData(2)
 
             if confirmacao == b'00':
+                # if contPacotes == 1:
+                #     contPacotes += 2
                 contPacotes += 1
             else:
                 contPacotes = int.from_bytes(confirmacao, "big") - 1
-                print(f"Precisamos reenviar o pacote {contPacotes}")
+                print(f"Precisamos reenviar o pacote {contPacotes + 1}")
                 print(contPacotes)
 
         
