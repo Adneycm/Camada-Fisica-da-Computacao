@@ -3,6 +3,30 @@
 #Carareto
 ####################################################
 
+# * FRAGMENTAÇÃO
+"""Nós iremos fragmentar o arquivo em pacotes a ser enviado para 
+    melhorar alguns pontos na comunicação:
+    1. Não deixar o canal de comunicação ocupado por muito tempo
+    2. Evitar problemas relacionados ao Hardware (tamanho do buffer)
+    3. Evitar ter que reenviar toda a mensagem caso uma parte seja perdida"""
+
+# * ACKNOWLEDGE / NOT ACKNOWLEDGE
+"""Durante a transmissão de mensagens é muito comum a troca de confirmações
+    de recebimento de um pacote ou até mesmo sinalizando que um pacote está
+    faltando, entretanto, essa robustez na comunicação pode deixá-lá mais
+    lenta. Tem-se, portanto um cuidado entre segurança e velocidade da infor-
+    mação que precisa ser tomado."""
+
+# * Organização da transmissão
+"""Nós iremos transmitir uma imagem portanto, fracionar essa imagem em pacotes de envio
+    que serão compostos pelo HEAD, PayLoad e EOP (End Of Package) é necessário para
+    garantir a confiabilidade da mensagem e evitar problemas como descrito no tópico de 
+    fragmentação. A organização do tamanho do pacote será feita da seguinte maneira:
+    --> HEAD: 10 bytes
+    --> PayLoad: 114 bytes
+    --> EOP: 4 bytes
+    Totalizando assim 128 bytes. Devemos portanto dividir o tamanho da nossa imagem nesses
+    pacotese enviá-los sequencialmente."""
 
 #esta é a camada superior, de aplicação do seu software de comunicação serial UART.
 #para acompanhar a execução e identificar erros, construa prints ao longo do código! 
@@ -60,30 +84,6 @@ def main():
                 print("Handshake recebido!\n")
                 break
          
-        # * FRAGMENTAÇÃO
-        """Nós iremos fragmentar o arquivo em pacotes a ser enviado para 
-           melhorar alguns pontos na comunicação:
-           1. Não deixar o canal de comunicação ocupado por muito tempo
-           2. Evitar problemas relacionados ao Hardware (tamanho do buffer)
-           3. Evitar ter que reenviar toda a mensagem caso uma parte seja perdida"""
-        
-        # * ACKNOWLEDGE / NOT ACKNOWLEDGE
-        """Durante a transmissão de mensagens é muito comum a troca de confirmações
-           de recebimento de um pacote ou até mesmo sinalizando que um pacote está
-           faltando, entretanto, essa robustez na comunicação pode deixá-lá mais
-           lenta. Tem-se, portanto um cuidado entre segurança e velocidade da infor-
-           mação que precisa ser tomado."""
-
-        # * Organização da transmissão
-        """Nós iremos transmitir uma imagem portanto, fracionar essa imagem em pacotes de envio
-           que serão compostos pelo HEAD, PayLoad e EOP (End Of Package) é necessário para
-           garantir a confiabilidade da mensagem e evitar problemas como descrito no tópico de 
-           fragmentação. A organização do tamanho do pacote será feita da seguinte maneira:
-           --> HEAD: 10 bytes
-           --> PayLoad: 114 bytes
-           --> EOP: 4 bytes
-           Totalizando assim 128 bytes. Devemos portanto dividir o tamanho da nossa imagem nesses
-           pacotese enviá-los sequencialmente."""
 
         
         # Pegando o caminho da imagem a ser transmitida
@@ -108,6 +108,7 @@ def main():
 
         # ! Vamos criar um LOOP para enviarmos sequencialmente o Head, PayLoad e EOP de cada pacote
         contPacotes = 0
+        j = 0
         while contPacotes < nPacotes:
             print(f"Enviando informações do pacote {contPacotes+1}")
 
@@ -118,7 +119,13 @@ def main():
             # * PayLoad
             payload = payloads[contPacotes] # Pacote
             # * EOP
+            # if j == 1:
+            #     EOP = b'1'
+            #     j += 1
+            # else:
             EOP = b'0'
+                # j += 1
+            print(f"contPacotes = {contPacotes}, EOP = {EOP}")
             
             tamanhoPacote = (len(HEAD + payload + EOP)).to_bytes(2,byteorder="big")
             com1.sendData(tamanhoPacote)
@@ -127,16 +134,26 @@ def main():
             time.sleep(1)
 
             # Recebendo confirmação se o pacote foi enviado corretamente
-            confirmacao, confrimacaoLen = com1.getData(2)
+            confirmacao, confrimacaoLen = com1.getData(1)
 
-            if confirmacao == b'00':
+            if confirmacao == b'2':
+                pacoteCerto, pacoteCertoLen = com1.getData(2)
+                contPacotes = int.from_bytes(pacoteCerto, "big") - 1
+                print(f"EOP está errado! Precisamos reenviar o pacote {contPacotes+1}")
+                print(contPacotes)
+
+            elif confirmacao == b'1':
+                pacoteCerto, pacoteCertoLen = com1.getData(2)
+                contPacotes = int.from_bytes(pacoteCerto, "big") - 1
+                print(f"Número do pacote está errado! Precisamos reenviar o pacote {contPacotes + 1}")
+                print(contPacotes)
+
+            else:
                 # if contPacotes == 1:
                 #     contPacotes += 2
+                # else:
                 contPacotes += 1
-            else:
-                contPacotes = int.from_bytes(confirmacao, "big") - 1
-                print(f"Precisamos reenviar o pacote {contPacotes + 1}")
-                print(contPacotes)
+                
 
         
         print("-------------------------")

@@ -76,21 +76,44 @@ def main():
             payload = pacote[10:tamPayload + 10]
             # EOP
             EOP = pacote[tamPayload + 10:len(pacote)]
+            print(f"EOP = {EOP}")
+            
 
+            # Sem erros = b'0'
+            semErro = b'0'
+            # Erro de número do pacote = b'1'
+            numErro = b'1'
+            # Erro de EOP = b'2'
+            eopErro = b'2'
+            
 
-            if nPacote == contPacotes+1:
-                # * Recebendo PayLoad
-                ImageRx += payload
-                # Enviando confirmação de que está tudo certo com o pacote
-                com1.sendData(b'00')
+            if EOP != b'0':
+                print(f"EOP está diferente do esperado! Por favor reenvie o pacote{contPacotes+1}\n")
+                # Enviando código de erro
+                com1.sendData(eopErro)
                 time.sleep(1)
-                contPacotes +=1
-            else:
-                print(f"A ordem do pacote está errada! Por favor envie o pacote {contPacotes+1}\n")
                 # Enviando mensagem pedindo o reenvio do pacote correto
                 pacoteCerto = (contPacotes+1).to_bytes(2, byteorder="big")
                 com1.sendData(pacoteCerto)
                 time.sleep(1)
+
+            elif nPacote != contPacotes+1:
+                print(f"A ordem do pacote está errada! Por favor envie o pacote {contPacotes+1}\n")
+                # Enviando código de erro
+                com1.sendData(numErro)
+                time.sleep(1)
+                # Enviando mensagem pedindo o reenvio do pacote correto
+                pacoteCerto = (contPacotes+1).to_bytes(2, byteorder="big")
+                com1.sendData(pacoteCerto)
+                time.sleep(1)
+                
+            else:
+                # * Recebendo PayLoad
+                ImageRx += payload
+                # Enviando confirmação de que está tudo certo com o pacote
+                com1.sendData(b'0')
+                time.sleep(1)
+                contPacotes +=1
 
 
         pathImageRx = "Imagens/rxImage.png"
