@@ -84,7 +84,6 @@ def main():
                 print("Handshake recebido!\n")
                 break
          
-
         
         # Pegando o caminho da imagem a ser transmitida
         pathImageTx = "Projeto 3 - datagrama/Imagens/txImage.png"
@@ -124,8 +123,7 @@ def main():
             #     j += 1
             # else:
             EOP = b'0'
-                # j += 1
-            print(f"contPacotes = {contPacotes}, EOP = {EOP}")
+            #j += 1
             
             tamanhoPacote = (len(HEAD + payload + EOP)).to_bytes(2,byteorder="big")
             com1.sendData(tamanhoPacote)

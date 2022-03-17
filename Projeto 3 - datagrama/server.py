@@ -75,9 +75,7 @@ def main():
             # PayLoad
             payload = pacote[10:tamPayload + 10]
             # EOP
-            EOP = pacote[tamPayload + 10:len(pacote)]
-            print(f"EOP = {EOP}")
-            
+            EOP = pacote[tamPayload + 10:len(pacote)]            
 
             # Sem erros = b'0'
             semErro = b'0'
@@ -88,7 +86,7 @@ def main():
             
 
             if EOP != b'0':
-                print(f"EOP está diferente do esperado! Por favor reenvie o pacote{contPacotes+1}\n")
+                print(f"EOP está diferente do esperado! Por favor reenvie o pacote {contPacotes+1}\n")
                 # Enviando código de erro
                 com1.sendData(eopErro)
                 time.sleep(1)
