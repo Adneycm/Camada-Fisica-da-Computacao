@@ -10,7 +10,6 @@
 
 from tracemalloc import stop
 
-
 from enlace import *
 import time
 import numpy as np
