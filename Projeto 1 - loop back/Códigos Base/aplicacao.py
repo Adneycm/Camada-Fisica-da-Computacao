@@ -7,7 +7,6 @@
 #esta é a camada superior, de aplicação do seu software de comunicação serial UART.
 #para acompanhar a execução e identificar erros, construa prints ao longo do código! 
 
-
 from tracemalloc import stop
 
 
@@ -96,7 +95,6 @@ def main():
         tempoRf= time.time()
         print(f"O tempo de recepção foi de {tempoRf - tempoRi}")
         print("")
-        # print("recebeu {}" .format(rxBuffer))
             
         f = open(imageW, 'wb')
         f.write(rxBuffer)
