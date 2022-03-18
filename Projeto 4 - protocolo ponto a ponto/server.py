@@ -5,6 +5,7 @@
 
 from re import X
 from tracemalloc import stop
+from xmlrpc import server
 from enlace import *
 import time
 import numpy as np
@@ -38,9 +39,15 @@ def main():
     try:
         
         com1 = enlace('COM4')
-        
-    
         com1.enable()
+
+        pacote, lenPacote = com1.getData(15)
+        print(pacote, 1000000)
+        print(f"{pacote}, {lenPacote}")
+        server = Server(pacote, lenPacote)
+        print("Handshake recebido com sucesso! Enviando reposta de estabilidade.")
+        com1.sendData(server.pacote)
+        time.sleep(.5)
 
         
         print("-------------------------")

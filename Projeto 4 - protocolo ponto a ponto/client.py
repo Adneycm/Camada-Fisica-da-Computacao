@@ -17,20 +17,20 @@ com1 = enlace('COM3')
 class Client:
 
     def __init__(self, file):
-        self.head = None
+        self.head = 0
         self.file = file
-        self.eop = 0xAA + 0xBB + 0xCC + 0xDD
-        self.payloads = None
-        self.h0 = None # tipo de mensagem
-        self.h1 = b'0' # livre
-        self.h2 = b'0' # livre
-        self.h3 = None # número total de pacotes do arquivo
-        self.h4 = None # número do pacote sendo enviado
-        self.h5 = None # se tipo for handshake:id do arquivo; se tipo for dados: tamanho do payload
-        self.h6 = b'0' # pacote solicitado para recomeço quando a erro no envio.
-        self.h7 = None # último pacote recebido com sucesso.
-        self.h8 = b'0' # CRC
-        self.h9 = b'0' # CRC
+        self.eop = 0xAABBCCDD.to_bytes(4, byteorder="big")
+        self.payloads = 0
+        self.h0 = 0 # tipo de mensagem
+        self.h1 = b'\x00' # livre
+        self.h2 = b'\x00' # livre
+        self.h3 = 0 # número total de pacotes do arquivo
+        self.h4 = 0 # número do pacote sendo enviado
+        self.h5 = 0 # se tipo for handshake:id do arquivo; se tipo for dados: tamanho do payload
+        self.h6 = b'\x00' # pacote solicitado para recomeço quando a erro no envio.
+        self.h7 = 0 # último pacote recebido com sucesso.
+        self.h8 = b'\x00' # CRC
+        self.h9 = b'\x00' # CRC
 
     # Quebra a imagem nos payloads
     def createPayloads(self):
@@ -42,8 +42,7 @@ class Client:
         self.h0 = (n).to_bytes(1, byteorder="big")
         # Mensagem do tipo Handshake
         if n == 1:
-            self.h5 = b'0' # ? o que é o id do arquivo
-            self.handshake()
+            self.h5 = b'\x00' # ? o que é o id do arquivo
         # Mensagem do tipo dados
         elif n == 3:
             self.h5 = len(self.payload)
@@ -60,7 +59,7 @@ class Client:
 
     # Cria a composição do head
     def createHead(self):
-        self.head = self.h1+self.h2+self.h3+self.h4+self.h5+self.h6+self.h7+self.h8+self.h9
+        self.head = self.h0+self.h1+self.h2+self.h3+self.h4+self.h5+self.h6+self.h7+self.h8+self.h9
 
     # Cria pacote
     def createPacote(self):
@@ -68,48 +67,62 @@ class Client:
 
     # Realiza o handshake
     def handshake(self):
+        payload = b'\x00'
+        self.defTypeMsg(1)
+        self.h3 = b'\x00'
+        self.h4 = b'\x00'
+        self.h7 = b'\x00'
         self.createHead()
-        payload = (114).to_bytes(114, byteorder="big")
-        pacote = self.createHead() + payload + self.eop
-        cont = 0
+        pacote = self.head + payload + self.eop
+        print(pacote)
+        print(len(pacote))
+        timeMax = time.time()
         while True: 
-            com1.senData(pacote)
+            com1.sendData(np.asarray(pacote))
             time.sleep(.5)
-            confirmacao, lenConfimacao = com1.getData(128)
-            cont += 1
-            if type(confirmacao) == str:
-                continue
-            elif cont == 4:
-                return "Servidor não respondeu após quarta tentativa. Cancelando comunicação."
+            confirmacao, lenConfimacao = com1.getData(15)
+            timeF = time.time()
+            print(timeF - timeMax)
+            if timeF - timeMax >= 25:
+                print("Servidor não respondeu após quarta tentativa. Cancelando comunicação.")
+                break
+
+            elif type(confirmacao) == str:
+                print(confirmacao)
+
             else:
                 return confirmacao
-                break
             
-
-
-
-            
-
 
 serialName = "COM3"     
 file = "Projeto 4 - protocolo ponto a ponto/Imagens/txImage.png"              
 
 def main():
     try:
-      
-        com1 = enlace('COM3')
         
+        
+        com1 = enlace('COM3')
         com1.enable()
 
         cliente = Client(file)
+
         payloads = cliente.createPayloads()
-        cliente.handshake()
-        #for payload in payloads:
+
+        print("Iniciando HandShake\n")
+        #com1.sendData(b'\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xaa\xbb\xcc\xdd')
+        if cliente.handshake() is None:
+            print("-------------------------")
+            print("Comunicação encerrada")
+            print("-------------------------")
+            com1.disable()
+            exit()
+
+        print("Handshake realizado com sucesso! Servidor está pronto para o recebimento da mensagem.")
 
 
 
 
-        
+
 
         
         print("-------------------------")

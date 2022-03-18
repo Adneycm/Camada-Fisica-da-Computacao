@@ -73,7 +73,7 @@ class RX(object):
             time.sleep(0.05)
             tempoF = time.time()
             if (tempoF - tempoI) >= 5:
-                return input("Servidor inativo! Vamos tentar reenviar o pacote.\n") 
+                return "Servidor inativo! Vamos tentar reenviar o pacote.\n"
 
         return(self.getBuffer(size))
 
