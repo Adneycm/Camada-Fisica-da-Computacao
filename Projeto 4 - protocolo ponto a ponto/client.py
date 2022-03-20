@@ -29,7 +29,7 @@ class Client:
         self.h3 = 0 # número total de pacotes do arquivo
         self.h4 = 0 # número do pacote sendo enviado
         self.h5 = 0 # se tipo for handshake:id do arquivo; se tipo for dados: tamanho do payload
-        self.h6 = b'\x00' # pacote solicitado para recomeço quando a erro no envio.
+        self.h6 = b'\x00' # pacote solicitado para recomeço quando há erro no envio.
         self.h7 = 0 # último pacote recebido com sucesso.
         self.h8 = b'\x00' # CRC
         self.h9 = b'\x00' # CRC
@@ -61,25 +61,43 @@ class Client:
             self.h5 = b'\x00' # ? o que é o id do arquivo
         # Mensagem do tipo dados
         elif n == 3:
-            self.h5 = len(self.payload)
+            self.h5 = len(self.payloads[int.from_bytes(self.h4,"big")-1])
             self.h5 = (self.h5).to_bytes(1, byteorder="big")
 
     def defNumMsg(self,n):
         self.h4 = (n).to_bytes(1, byteorder="big")
+        self.h7 = (n-1).to_bytes(1, byteorder="big")
 
     # Define a quantidade de pacotes que serão enviados
-    def qtdPacotes(self, file):
-        lenImage = len(file)
+    def qtdPacotes(self):
+        lenImage = len(self.file)
         h3 = math.ceil(lenImage/114)
-        self.h3 = (h3).to_bytes(2, byteorder="big")
+        self.h3 = (h3).to_bytes(1, byteorder="big")
 
     # Cria a composição do head
     def createHead(self):
         self.head = self.h0+self.h1+self.h2+self.h3+self.h4+self.h5+self.h6+self.h7+self.h8+self.h9
 
-    # Cria pacote
+    # Cria pacote  
     def createPacote(self):
-        return self.head + self.payloads[self.h4] + self.eop
+        return self.head + self.payloads[int.from_bytes(self.h4,"big") - 1] + self.eop
+
+
+    # Checa o tempo máximo para a resposta do servidor
+    def SendWait(self, pacote):
+        timeMax = time.time()
+        while True: 
+            self.clientCom.sendData(pacote)
+            time.sleep(1)
+            confirmacao, lenConfimacao = self.clientCom.getData(15)
+            timeF = time.time()
+            if timeF - timeMax >= 25:
+                print("Servidor não respondeu após quarta tentativa. Cancelando comunicação.")
+                break
+            elif type(confirmacao) == str:
+                print(confirmacao)
+            else:
+                return confirmacao
 
     # Realiza o handshake
     def handshake(self):
@@ -90,39 +108,33 @@ class Client:
         self.h7 = b'\x00'
         self.createHead()
         pacote = self.head + payload + self.eop
-        print(pacote)
-        print(len(pacote))
-        timeMax = time.time()
-        while True: 
-            self.clientCom.sendData(pacote)
-            time.sleep(1)
-            confirmacao, lenConfimacao = self.clientCom.getData(15)
-            print(type(confirmacao))
-            timeF = time.time()
-            if timeF - timeMax >= 25:
-                print("Servidor não respondeu após quarta tentativa. Cancelando comunicação.")
-                break
+        return self.SendWait(pacote)
 
-            elif type(confirmacao) == str:
-                print('oi')
-                print(confirmacao)
+    # Checa o tipo de mensagem na confirmação enviada pelo servidor
+    def checkTypeMsg(self, confirmacao):
+        print('oi')
+        #typeMsg = int.from_bytes(confirmacao[0], "big")
+        if confirmacao[0] == 4:
+            print("Tudo certo! O servidor recebeu o pacote corretamente.")
+        else:
+            numPacoteCorreto = confirmacao[6]
+            print(f"Uhmm, algo deu errado no envio :(\nPrecisamos reenviar o pacote {numPacoteCorreto}")
+            return numPacoteCorreto
 
-            else:
-                print('oioi')
-                return confirmacao
+
                 
             
-
 serialName = "COM3"     
-file = "Projeto 4 - protocolo ponto a ponto/Imagens/txImage.png"              
+path = "Projeto 4 - protocolo ponto a ponto/Imagens/txImage.png"  
+file = open(path, 'rb').read()         
+print(file)
+print(len(file))   
 
 def main():
     try:
         
         
-        # com1 = enlace('COM3')
-        # com1.enable()
-
+        # * INICIALIZANDO CLIENT
         cliente = Client(file, 'COM3')
         cliente.startClient()
 
@@ -131,14 +143,45 @@ def main():
         print("Iniciando HandShake\n")
         if cliente.handshake() is None:
             cliente.closeClient()
-        
-        print("Handshake realizado com sucesso! Servidor está pronto para o recebimento da mensagem.")
+        print("Handshake realizado com sucesso! Servidor está pronto para o recebimento da mensagem.\n")
+
+        # * ENVIO DOS PACOTES
+        print("Agora vamos realizar o início do envio dos pacotes\n")
+        payloads = cliente.createPayloads()
+        # h3 = quantidade total de pacotes
+        cliente.qtdPacotes()
+        # h4 = número do pacote sendo enviado
+        h4 = 1
+        # último pacote enviado com sucesso
+        cont = 0
+        while cont < int.from_bytes(cliente.h3, "big"):
+            print(f"Enviando informações do pacote {h4}")
+            cliente.defNumMsg(h4)
+            cliente.defTypeMsg(3)
+            cliente.createHead()
+            pacote = cliente.createPacote()
+            confirmacao = cliente.SendWait(pacote)
+            print(len(pacote))
+
+            if confirmacao is None:
+                cliente.closeClient()
+
+            numPacote = cliente.checkTypeMsg(confirmacao)
+            if numPacote is None:
+                h4 +=1
+                cont += 1
+            else:
+                h4 = numPacote
+                cont = numPacote
+
+            
+            
+            
+
+            
 
 
-
-
-
-
+        # * FECHANDO CLIENT
         cliente.closeClient()
         
     except Exception as erro:
