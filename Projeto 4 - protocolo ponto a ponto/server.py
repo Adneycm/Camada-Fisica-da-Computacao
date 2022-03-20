@@ -31,6 +31,9 @@ class Server:
         h8 = head[8] # CRC
         h9 = head[9] # CRC
         return h0, h1, h2, h3, h4, h5, h6, h7, h8, h9
+
+    def checkTypeMsg(self):
+        print("")
         
 
 serialName = "COM4"         
@@ -41,12 +44,13 @@ def main():
         com1 = enlace('COM4')
         com1.enable()
 
+
+        print("Esperando HandShake\n")
         pacote, lenPacote = com1.getData(15)
-        print(pacote, 1000000)
-        print(f"{pacote}, {lenPacote}")
-        server = Server(pacote, lenPacote)
+        print(f"Pacote = {pacote}, lenPacote = {lenPacote}")
+        #server = Server(pacote, lenPacote)
         print("Handshake recebido com sucesso! Enviando reposta de estabilidade.")
-        com1.sendData(server.pacote)
+        com1.sendData(pacote)
         time.sleep(.5)
 
         

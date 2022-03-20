@@ -16,10 +16,12 @@ com1 = enlace('COM3')
 
 class Client:
 
-    def __init__(self, file):
+    def __init__(self, file, serialName):
+        #self.clientCom = None
+        self.serialName = serialName
         self.head = 0
         self.file = file
-        self.eop = 0xAABBCCDD.to_bytes(4, byteorder="big")
+        self.eop = 0x00000000.to_bytes(4, byteorder="big")
         self.payloads = 0
         self.h0 = 0 # tipo de mensagem
         self.h1 = b'\x00' # livre
@@ -31,6 +33,20 @@ class Client:
         self.h7 = 0 # último pacote recebido com sucesso.
         self.h8 = b'\x00' # CRC
         self.h9 = b'\x00' # CRC
+
+
+    def startClient(self):
+        self.clientCom = enlace(self.serialName)
+        self.clientCom.enable()
+
+
+    def closeClient(self):
+        print("-------------------------")
+        print("Comunicação encerrada")
+        print("-------------------------")
+        self.clientCom.disable()
+        exit()
+
 
     # Quebra a imagem nos payloads
     def createPayloads(self):
@@ -78,20 +94,23 @@ class Client:
         print(len(pacote))
         timeMax = time.time()
         while True: 
-            com1.sendData(np.asarray(pacote))
-            time.sleep(.5)
-            confirmacao, lenConfimacao = com1.getData(15)
+            self.clientCom.sendData(pacote)
+            time.sleep(1)
+            confirmacao, lenConfimacao = self.clientCom.getData(15)
+            print(type(confirmacao))
             timeF = time.time()
-            print(timeF - timeMax)
             if timeF - timeMax >= 25:
                 print("Servidor não respondeu após quarta tentativa. Cancelando comunicação.")
                 break
 
             elif type(confirmacao) == str:
+                print('oi')
                 print(confirmacao)
 
             else:
+                print('oioi')
                 return confirmacao
+                
             
 
 serialName = "COM3"     
@@ -101,22 +120,18 @@ def main():
     try:
         
         
-        com1 = enlace('COM3')
-        com1.enable()
+        # com1 = enlace('COM3')
+        # com1.enable()
 
-        cliente = Client(file)
+        cliente = Client(file, 'COM3')
+        cliente.startClient()
 
-        payloads = cliente.createPayloads()
 
+        # * HANDSHAKE
         print("Iniciando HandShake\n")
-        #com1.sendData(b'\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xaa\xbb\xcc\xdd')
         if cliente.handshake() is None:
-            print("-------------------------")
-            print("Comunicação encerrada")
-            print("-------------------------")
-            com1.disable()
-            exit()
-
+            cliente.closeClient()
+        
         print("Handshake realizado com sucesso! Servidor está pronto para o recebimento da mensagem.")
 
 
@@ -124,11 +139,7 @@ def main():
 
 
 
-        
-        print("-------------------------")
-        print("Comunicação encerrada")
-        print("-------------------------")
-        com1.disable()
+        cliente.closeClient()
         
     except Exception as erro:
         print("ops! :-\\")
