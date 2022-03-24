@@ -34,6 +34,7 @@ class Client:
         self.h7 = 0 # último pacote recebido com sucesso.
         self.h8 = b'\x00' # CRC
         self.h9 = b'\x00' # CRC
+        self.logs = ''
 
 
     def startClient(self):
@@ -89,8 +90,8 @@ class Client:
         timeMax = time.time()
         while True: 
             self.clientCom.sendData(pacote)
-            self.writeLog(pacote, 'envio')
-            time.sleep(1)
+            self.createLog(pacote, 'envio')
+            time.sleep(.5)
             confirmacao, lenConfimacao = self.clientCom.getData(15)
             timeF = time.time()
             if timeF - timeMax >= 25:
@@ -116,23 +117,27 @@ class Client:
     def checkTypeMsg(self, confirmacao):
         #typeMsg = int.from_bytes(confirmacao[0], "big")
         if confirmacao[0] == 4:
+            self.createLog(confirmacao, 'recebimento')
             print("Tudo certo! O servidor recebeu o pacote corretamente.")
         else:
-            numPacoteCorreto = confirmacao[6]
-            print(f"Uhmm, algo deu errado no envio :(\nPrecisamos reenviar o pacote {numPacoteCorreto}")
+            self.createLog(confirmacao, 'recebimento')
+            numPacoteCorreto = confirmacao[7] + 1
+            print(f"Uhmm, algo deu errado no envio :( Precisamos reenviar o pacote {numPacoteCorreto}")
             return numPacoteCorreto
     
+    
     # Escreve os logs
-    def writeLog(self, data, tipo):
+    def createLog(self, data, tipo):
         tempo = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         tipoMsg = data[0]
         tamMsg = len(data)
         pacoteEnviado = data[4]
         totalPacotes = data[3]
-        with open(f'Projeto 4 - protocolo ponto a ponto/logs/log{pacoteEnviado}.txt', 'w') as f:
-            f.write(f"{tempo} / {tipo} / {tipoMsg} / {tamMsg} / {pacoteEnviado} / {totalPacotes}\n")
-
-
+        self.logs += f"{tempo} / {tipo} / {tipoMsg} / {tamMsg} / {pacoteEnviado} / {totalPacotes}\n"
+        
+    def writeLog(self):
+        with open(f'Projeto 4 - protocolo ponto a ponto/logs/logClient.txt', 'w') as f:
+            f.write(self.logs)
                 
             
 serialName = "COM3"     
@@ -144,11 +149,9 @@ print(len(file))
 def main():
     try:
         
-        
         # * INICIALIZANDO CLIENT
         cliente = Client(file, 'COM3')
         cliente.startClient()
-
 
         # * HANDSHAKE
         print("Iniciando HandShake\n")
@@ -167,6 +170,11 @@ def main():
         cont = 0
         while cont < int.from_bytes(cliente.h3, "big"):
             print(f"Enviando informações do pacote {h4}")
+            # #! ERRO 
+            # if h4 == 3:
+            #     cliente.defNumMsg(2)
+            # else:
+            #     #!
             cliente.defNumMsg(h4)
             cliente.defTypeMsg(3)
             cliente.createHead()
@@ -178,13 +186,13 @@ def main():
 
             numPacote = cliente.checkTypeMsg(confirmacao)
             if numPacote is None:
-                h4 +=1
+                h4 += 1
                 cont += 1
             else:
                 h4 = numPacote
                 cont = numPacote
 
-
+        cliente.writeLog()
         # * FECHANDO CLIENT
         cliente.closeClient()
         

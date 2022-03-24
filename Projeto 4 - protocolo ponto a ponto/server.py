@@ -66,16 +66,24 @@ class Server:
     def checkMsgreliability(self, pacote, numPacote):
         h0, h1, h2, h3, h4, h5, h6, h7, h8, h9 = self.fracionaHead(pacote)
         # Checando se o número do pacote enviado está correto
-        #h4 = int.from_bytes(h4, "big")
         if h4 != numPacote:
             print(f"O número do pacote está errado! Por favor reenvie o pacote {numPacote}")
-            return numPacote
+            h0 = 6
+            h7 = numPacote
+            confirmacao = [h0, h1, h2, h3, h4, h5, h6, h7, h8, h9]
+            responseCorrectMsg = b''
+            for i in confirmacao:
+                i = (i).to_bytes(1, byteorder="big")
+                responseCorrectMsg += i
+            self.serverCom.sendData(responseCorrectMsg + b'\x00' + 0x00000000.to_bytes(4, byteorder="big"))
+            time.sleep(.5)
+            return numPacote, h3
 
         # Checando se o EOP está no local correto
         eop = pacote[len(pacote)-4:len(pacote)+1]
         if eop != 0x00000000.to_bytes(4, byteorder="big"):
             print(f"O eop está no local errado! Por favor reenvie o pacote {numPacote}")
-            return numPacote
+            return numPacote, h3
         
         print("Está tudo certo com a mensagem! Vamos enviar uma mensagem de confirmação.")
         h0 = 4
@@ -85,8 +93,8 @@ class Server:
         for i in confirmacao:
             i = (i).to_bytes(1, byteorder="big")
             responseCorrectMsg += i
-        print(responseCorrectMsg)
         self.serverCom.sendData(responseCorrectMsg + b'\x00' + 0x00000000.to_bytes(4, byteorder="big"))
+        time.sleep(.5)
         return h4, h3
 
 
@@ -94,10 +102,6 @@ class Server:
         
 
 serialName = "COM4"     
-
-### MENSAGENS IMPORTANTES ###
-responseHandShake = b'\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-responseCorrectMsg = b'\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 def main():
     try:
@@ -121,23 +125,20 @@ def main():
             print(f"Recebendo informações do pacote {numPacote}")
             # Recebendo o head
             head, lenHead = server.receiveData(10)
-            print(head, head[5])
-            #lenPayload = int.from_bytes(head[5], byteorder="big")
             lenPayload = head[5]
             payload_EOP, lenPayload_EOP = server.receiveData(lenPayload + 4)
             numPacoteConfirmacao, h3 = server.checkMsgreliability(head + payload_EOP, numPacote)
             if numPacote == numPacoteConfirmacao:
                 numPacote += 1
                 data += payload_EOP[0:len(payload_EOP) - 4]
-                print(len(data))
             if numPacote == h3 + 1:
                 data += payload_EOP[0:len(payload_EOP) - 4]
                 break
             
+            
 
 
         pathImageRx = "Imagens/rxImage.png"
-        print(len(data))
         print(data[0:len(data)])
         f = open(pathImageRx, 'wb')
         f.write(data)
