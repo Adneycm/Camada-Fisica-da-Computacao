@@ -77,10 +77,10 @@ class RX(object):
 
         return(self.getBuffer(size))
 
-    # def getNData(self, size):
-    #     while(self.getBufferLen() < size):
-    #         time.sleep(0.05)               
-    #     return(self.getBuffer(size))
+    def getNDataServer(self, size):
+        while(self.getBufferLen() < size):
+            time.sleep(0.05)               
+        return(self.getBuffer(size))
 
 
     def clearBuffer(self):

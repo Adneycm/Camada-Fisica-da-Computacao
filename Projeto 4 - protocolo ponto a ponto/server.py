@@ -31,13 +31,13 @@ class Server:
         exit()
 
     def receiveData(self,n):
-        return self.serverCom.getData(n)
+        return self.serverCom.getDataServer(n)
 
     def sendData(self, data):
         self.serverCom.sendData(data)
 
     def receiveHandShake(self,n):
-        pacote, lenPacote = self.serverCom.getData(n)
+        pacote, lenPacote = self.serverCom.getDataServer(n)
         pacote = list(pacote)
         pacote = list(map(int, pacote))
         pacote[0] = 2

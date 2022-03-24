@@ -9,6 +9,7 @@ import time
 import numpy as np
 import sys
 import math
+from datetime import datetime
 
 #   python -m serial.tools.list_ports
 
@@ -88,6 +89,7 @@ class Client:
         timeMax = time.time()
         while True: 
             self.clientCom.sendData(pacote)
+            self.writeLog(pacote, 'envio')
             time.sleep(1)
             confirmacao, lenConfimacao = self.clientCom.getData(15)
             timeF = time.time()
@@ -112,7 +114,6 @@ class Client:
 
     # Checa o tipo de mensagem na confirmação enviada pelo servidor
     def checkTypeMsg(self, confirmacao):
-        print('oi')
         #typeMsg = int.from_bytes(confirmacao[0], "big")
         if confirmacao[0] == 4:
             print("Tudo certo! O servidor recebeu o pacote corretamente.")
@@ -120,6 +121,16 @@ class Client:
             numPacoteCorreto = confirmacao[6]
             print(f"Uhmm, algo deu errado no envio :(\nPrecisamos reenviar o pacote {numPacoteCorreto}")
             return numPacoteCorreto
+    
+    # Escreve os logs
+    def writeLog(self, data, tipo):
+        tempo = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        tipoMsg = data[0]
+        tamMsg = len(data)
+        pacoteEnviado = data[4]
+        totalPacotes = data[3]
+        with open(f'Projeto 4 - protocolo ponto a ponto/logs/log{pacoteEnviado}.txt', 'w') as f:
+            f.write(f"{tempo} / {tipo} / {tipoMsg} / {tamMsg} / {pacoteEnviado} / {totalPacotes}\n")
 
 
                 
@@ -161,7 +172,6 @@ def main():
             cliente.createHead()
             pacote = cliente.createPacote()
             confirmacao = cliente.SendWait(pacote)
-            print(len(pacote))
 
             if confirmacao is None:
                 cliente.closeClient()
@@ -173,12 +183,6 @@ def main():
             else:
                 h4 = numPacote
                 cont = numPacote
-
-            
-            
-            
-
-            
 
 
         # * FECHANDO CLIENT
