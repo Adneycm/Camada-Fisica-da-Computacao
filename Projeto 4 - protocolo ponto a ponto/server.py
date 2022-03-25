@@ -12,12 +12,15 @@ from enlace import *
 import time
 import numpy as np
 import time
+from datetime import datetime
+
 
 #   python -m serial.tools.list_ports
 
 class Server:
     def __init__(self, serialName):
         self.serialName = serialName
+        self.logs = ''
         
     def startServer(self):
         self.serverCom = enlace(self.serialName)
@@ -37,7 +40,8 @@ class Server:
         self.serverCom.sendData(data)
 
     def receiveHandShake(self,n):
-        pacote, lenPacote = self.serverCom.getDataServer(n)
+        pacote, lenPacote = self.serverCom.getData(n)
+        self.createLog(pacote, 'recebimento')
         pacote = list(pacote)
         pacote = list(map(int, pacote))
         pacote[0] = 2
@@ -64,6 +68,7 @@ class Server:
         return h0, h1, h2, h3, h4, h5, h6, h7, h8, h9
 
     def checkMsgreliability(self, pacote, numPacote):
+        self.createLog(pacote, 'recebimento')
         h0, h1, h2, h3, h4, h5, h6, h7, h8, h9 = self.fracionaHead(pacote)
         # Checando se o número do pacote enviado está correto
         if h4 != numPacote:
@@ -77,13 +82,13 @@ class Server:
                 responseCorrectMsg += i
             self.serverCom.sendData(responseCorrectMsg + b'\x00' + 0x00000000.to_bytes(4, byteorder="big"))
             time.sleep(.5)
-            return numPacote, h3
+            return h4, h3
 
         # Checando se o EOP está no local correto
         eop = pacote[len(pacote)-4:len(pacote)+1]
         if eop != 0x00000000.to_bytes(4, byteorder="big"):
             print(f"O eop está no local errado! Por favor reenvie o pacote {numPacote}")
-            return numPacote, h3
+            return h4, h3
         
         print("Está tudo certo com a mensagem! Vamos enviar uma mensagem de confirmação.")
         h0 = 4
@@ -94,8 +99,23 @@ class Server:
             i = (i).to_bytes(1, byteorder="big")
             responseCorrectMsg += i
         self.serverCom.sendData(responseCorrectMsg + b'\x00' + 0x00000000.to_bytes(4, byteorder="big"))
+        self.createLog(responseCorrectMsg + b'\x00' + 0x00000000.to_bytes(4, byteorder="big"), 'envio')
         time.sleep(.5)
         return h4, h3
+
+    
+    # Escreve os logs
+    def createLog(self, data, tipo):
+        tempo = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        tipoMsg = data[0]
+        tamMsg = len(data)
+        pacoteEnviado = data[4]
+        totalPacotes = data[3]
+        self.logs += f"{tempo} / {tipo} / {tipoMsg} / {tamMsg} / {pacoteEnviado} / {totalPacotes}\n"
+        
+    def writeLog(self):
+        with open(f'logs/logServer.txt', 'w') as f:
+            f.write(self.logs)
 
 
         
@@ -127,23 +147,25 @@ def main():
             head, lenHead = server.receiveData(10)
             lenPayload = head[5]
             payload_EOP, lenPayload_EOP = server.receiveData(lenPayload + 4)
-            numPacoteConfirmacao, h3 = server.checkMsgreliability(head + payload_EOP, numPacote)
-            if numPacote == numPacoteConfirmacao:
+            numPacoteRecebido, h3 = server.checkMsgreliability(head + payload_EOP, numPacote)
+            if numPacote == numPacoteRecebido:
                 numPacote += 1
-                data += payload_EOP[0:len(payload_EOP) - 4]
+                data += payload_EOP[0:len(payload_EOP) - 4]                
+
             if numPacote == h3 + 1:
                 data += payload_EOP[0:len(payload_EOP) - 4]
                 break
             
             
+            
 
 
         pathImageRx = "Imagens/rxImage.png"
-        print(data[0:len(data)])
         f = open(pathImageRx, 'wb')
         f.write(data)
         f.close()
 
+        server.writeLog()
         # * FECHANDO CLIENT
         server.closeServer()
         

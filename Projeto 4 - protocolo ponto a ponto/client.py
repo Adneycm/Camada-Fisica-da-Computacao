@@ -118,10 +118,11 @@ class Client:
         #typeMsg = int.from_bytes(confirmacao[0], "big")
         if confirmacao[0] == 4:
             self.createLog(confirmacao, 'recebimento')
+            print(confirmacao[7])
             print("Tudo certo! O servidor recebeu o pacote corretamente.")
         else:
             self.createLog(confirmacao, 'recebimento')
-            numPacoteCorreto = confirmacao[7] + 1
+            numPacoteCorreto = confirmacao[7]
             print(f"Uhmm, algo deu errado no envio :( Precisamos reenviar o pacote {numPacoteCorreto}")
             return numPacoteCorreto
     
@@ -142,9 +143,7 @@ class Client:
             
 serialName = "COM3"     
 path = "Projeto 4 - protocolo ponto a ponto/Imagens/txImage.png"  
-file = open(path, 'rb').read()         
-print(file)
-print(len(file))   
+file = open(path, 'rb').read()           
 
 def main():
     try:
@@ -170,11 +169,6 @@ def main():
         cont = 0
         while cont < int.from_bytes(cliente.h3, "big"):
             print(f"Enviando informações do pacote {h4}")
-            # #! ERRO 
-            # if h4 == 3:
-            #     cliente.defNumMsg(2)
-            # else:
-            #     #!
             cliente.defNumMsg(h4)
             cliente.defTypeMsg(3)
             cliente.createHead()
@@ -186,11 +180,15 @@ def main():
 
             numPacote = cliente.checkTypeMsg(confirmacao)
             if numPacote is None:
-                h4 += 1
-                cont += 1
+                if h4 == 2:
+                    h4 += 2
+                    cont +=1
+                else:
+                    h4 += 1
+                    cont += 1
             else:
                 h4 = numPacote
-                cont = numPacote
+                cont = numPacote - 1
 
         cliente.writeLog()
         # * FECHANDO CLIENT
