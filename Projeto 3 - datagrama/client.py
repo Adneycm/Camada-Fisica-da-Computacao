@@ -84,7 +84,6 @@ def main():
                 print("Handshake recebido!\n")
                 break
          
-        
         # Pegando o caminho da imagem a ser transmitida
         pathImageTx = "Projeto 3 - datagrama/Imagens/txImage.png"
         # Agora vamos abrir o arquivo da imagem e lê-lo com um arquivo binário
