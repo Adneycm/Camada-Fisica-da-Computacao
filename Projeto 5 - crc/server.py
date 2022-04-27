@@ -7,12 +7,14 @@ from tracemalloc import stop
 from urllib import response
 from xmlrpc import server
 
-from pandas import array
+#from pandas import array
 from enlace import *
 import time
 import numpy as np
 import time
 from datetime import datetime
+from crccheck.crc import Crc16
+from crccheck.checksum import Checksum16
 
 
 #   python -m serial.tools.list_ports
@@ -70,6 +72,7 @@ class Server:
     def checkMsgreliability(self, pacote, numPacote):
         self.createLog(pacote, 'recebimento')
         h0, h1, h2, h3, h4, h5, h6, h7, h8, h9 = self.fracionaHead(pacote)
+
         # Checando se o número do pacote enviado está correto
         if h4 != numPacote:
             print(f"O número do pacote está errado! Por favor reenvie o pacote {numPacote}")
@@ -89,7 +92,15 @@ class Server:
         if eop != 0x00000000.to_bytes(4, byteorder="big"):
             print(f"O eop está no local errado! Por favor reenvie o pacote {numPacote}")
             return h4, h3
-        
+
+        # Checando se o CRC está correto
+        crc1, crc2 = Crc16.calc(pacote[10:len(pacote) - 4]).to_bytes(2,byteorder='big')
+        crc_h8 = crc1.to_bytes(1,byteorder='big')
+        crc_h9 = crc2.to_bytes(1,byteorder='big')
+        if (h8.to_bytes(1, byteorder="big") != crc_h8) or (h9.to_bytes(1, byteorder="big") != crc_h9):
+            print(f"O CRC está errado! Por favor reenvie o pacote {numPacote}")
+            return h4, h3
+
         print("Está tudo certo com a mensagem! Vamos enviar uma mensagem de confirmação.")
         h0 = 4
         h7 = numPacote
@@ -157,9 +168,6 @@ def main():
                 break
             
             
-            
-
-
         pathImageRx = "Imagens/rxImage.png"
         f = open(pathImageRx, 'wb')
         f.write(data)

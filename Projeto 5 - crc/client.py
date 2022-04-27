@@ -10,8 +10,10 @@ import numpy as np
 import sys
 import math
 from datetime import datetime
+from crccheck.crc import Crc16
+from crccheck.checksum import Checksum16
 
-#   python -m serial.tools.list_ports
+#  python -m serial.tools.list_ports
 
 com1 = enlace('COM3')
 
@@ -70,6 +72,14 @@ class Client:
         self.h4 = (n).to_bytes(1, byteorder="big")
         self.h7 = (n-1).to_bytes(1, byteorder="big")
 
+    def createCRC(self):
+        data = self.payloads[int.from_bytes(self.h4,"big") - 1]
+        if int.from_bytes(self.h4,"big") - 1 == 2:
+            data = self.payloads[1]
+        crc1, crc2 = Crc16.calc(data).to_bytes(2,byteorder='big')
+        self.h8 = crc1.to_bytes(1,byteorder='big')
+        self.h9 = crc2.to_bytes(1,byteorder='big')
+
     # Define a quantidade de pacotes que serão enviados
     def qtdPacotes(self):
         lenImage = len(self.file)
@@ -83,6 +93,7 @@ class Client:
     # Cria pacote  
     def createPacote(self):
         return self.head + self.payloads[int.from_bytes(self.h4,"big") - 1] + self.eop
+        
 
 
     # Checa o tempo máximo para a resposta do servidor
@@ -170,6 +181,8 @@ def main():
         while cont < int.from_bytes(cliente.h3, "big"):
             print(f"Enviando informações do pacote {h4}")
             cliente.defNumMsg(h4)
+            cliente.createCRC()
+            print(cliente.h8, cliente.h9)
             cliente.defTypeMsg(3)
             cliente.createHead()
             pacote = cliente.createPacote()
@@ -180,12 +193,12 @@ def main():
 
             numPacote = cliente.checkTypeMsg(confirmacao)
             if numPacote is None:
-                if h4 == 2:
-                    h4 += 2
-                    cont +=1
-                else:
-                    h4 += 1
-                    cont += 1
+                # if h4 == 2:
+                #     h4 += 2
+                #     cont +=1
+            # else:
+                h4 += 1
+                cont += 1
             else:
                 h4 = numPacote
                 cont = numPacote - 1
@@ -203,3 +216,15 @@ def main():
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
     main()
+
+
+# data = bytearray.fromhex("DEADBEEF")
+# crc = Crc16.calc(data).to_bytes(2,byteorder='big')
+# crc1, crc2 = Crc16.calc(data).to_bytes(2,byteorder='big')
+# h8 = crc1.to_bytes(1,byteorder='big')
+# h9 = crc2.to_bytes(1,byteorder='big')
+# checksum = Checksum16.calc(data)
+
+# print(crc)
+# print(h8, h9)
+# print(checksum)
