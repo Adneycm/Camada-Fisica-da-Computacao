@@ -94,8 +94,6 @@ class Client:
     def createPacote(self):
         return self.head + self.payloads[int.from_bytes(self.h4,"big") - 1] + self.eop
         
-
-
     # Checa o tempo máximo para a resposta do servidor
     def SendWait(self, pacote):
         timeMax = time.time()
