@@ -1,3 +1,5 @@
+// ARQUIVO PARA REALIZAR O PROCESSO COM AS VARIÁVEIS E FUNÇÕES
+
 #include "sw_uart.h"
 
 due_sw_uart uart;
