@@ -26,58 +26,55 @@ int calc_even_parity(char data) {
   return ones % 2;
 }
 
-int sw_uart_receive_byte(due_sw_uart *uart, char* data) {
-  // wait start bit
-  while(digitalRead(uart->pin_rx) == HIGH)
-  {
-    //Serial.println("esperando byte");
+sw_uart_send_byte(due_sw_uart *uart, char* data) {
+  
+  // Primeiro vamos deixar o sinal em alto por 5 vezes o período de um bit
+  for(int i = 0; i < 1093*10; i++) {
+    digitalWrite(4, HIGH);
   }
-
-  Serial.println("\nchegou byte");
-  // confirm start bit
-  _sw_uart_wait_half_T(uart);
-  // HIGH = invalid
-  if(digitalRead(uart->pin_rx) == HIGH) {
-    return SW_UART_ERROR_FRAMING;
-  }
-
+  
+  // Agora vamos baixar o sinal para mandar o "start bit"
+  digitalWrite(uart->pin_rx, LOW);
   _sw_uart_wait_T(uart);
   
-  // start getting data 
-  char aux = 0x00;
-  for(int i = 0; i < uart->databits; i++) {
-    aux |= digitalRead(uart->pin_rx) << i;
+  // Agora o server está esperando a mensagem, então vamos enviá-la
+  char aux = 0x00000000;
+  for(int i = 0; i < 8; i++) {
+    digitalWrite(uart->pin_rx, LOW);
     _sw_uart_wait_T(uart);
-  }
-  
-  // parity
-  int rx_parity = 0;
-  if(uart->paritybit != SW_UART_NO_PARITY) {
-    rx_parity = digitalRead(uart->pin_rx);
+
+    digitalWrite(uart->pin_rx, HIGH);
+    _sw_uart_wait_T(uart);
+
+    digitalWrite(uart->pin_rx, HIGH);
+    _sw_uart_wait_T(uart);
+
+    digitalWrite(uart->pin_rx, LOW);
+    _sw_uart_wait_T(uart);
+
+    digitalWrite(uart->pin_rx, LOW);
+    _sw_uart_wait_T(uart);
+
+    digitalWrite(uart->pin_rx, LOW);
+    _sw_uart_wait_T(uart);
+
+    digitalWrite(uart->pin_rx, LOW);
+    _sw_uart_wait_T(uart);
+
+    digitalWrite(uart->pin_rx, HIGH);
     _sw_uart_wait_T(uart);
   }
 
-  // get stop bit
-  for(int i = 0; i < uart->stopbits; i++) {
-    if(digitalRead(uart->pin_rx) == LOW) {
-      return SW_UART_ERROR_FRAMING;
-    }
-    _sw_uart_wait_T(uart);
-  }
-  
-  int parity = 0;
-  if(uart->paritybit == SW_UART_EVEN_PARITY) {
-     parity = calc_even_parity(aux);
-  } else if(uart->paritybit == SW_UART_ODD_PARITY) {
-     parity = !calc_even_parity(aux);
-  }
+  // Enviada a mensagem é necessário agora enviar o bit de paridade
+  int bitParidade = calc_even_parity(data);
+  digitalWrite(uart->pin_rx, bitParidade);
+  _sw_uart_wait_T(uart);
 
-  if(parity != rx_parity) {
-    return SW_UART_ERROR_PARITY;
-  }
+  // Feito isso já teremos enviado todo o necessário, faltando apenas o stopbit
+  digitalWrite(uart->pin_rx, HIGH);
+  _sw_uart_wait_T(uart);
   
-  *data = aux;
-  return SW_UART_SUCCESS;
+  // Mensagem enviada!!
 }
 
 

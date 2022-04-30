@@ -35,6 +35,7 @@ int calc_even_parity(char data) {
 // função "sw_uart_receive_byte" que retorna um inteiro. A função efetua o recebimento dos bytes que serão enviados
 int sw_uart_receive_byte(due_sw_uart *uart, char* data) {
   // wait start bit
+  // A função digitalRead(pino) recebe o pino do arduino como argumento e retorna HIGH ou LOW
   // Visto que antes da msg ser enviada o sinal permanece alto(=1), logo esse while permanece rodando até que o sinal vire baixo(=0) sinalizando que a msg vai começar
   while(digitalRead(uart->pin_rx) == HIGH)
   {
@@ -58,12 +59,14 @@ int sw_uart_receive_byte(due_sw_uart *uart, char* data) {
   
   char aux = 0x00;
   // Esse for está realizando uma operação lógica OR com cada bit da mensagem e o valor 0, ou seja, se o bit for 1 o resultado da operação será 1, caso 
-  // contrário será 0.
-  
+  // contrário será 0. Ao receber um bit 1, por exemplo, na entrada a função digitalRead vai retornar um byte(menor unidade possível), então o retorno
+  // será 00000001 sem shiftar para esquerda. Ao receber o segundo bit de mensagem 1, por exemplo, o retorno será 00000001, porém será necessário shiftar
+  // uma casa para esquerda ficando assim: 00000010. Depois de agrupar cada bit da mensagem em seu byte
   for(int i = 0; i < uart->databits; i++) {
     // A função digitalRead(pino) recebe o pino do arduino como argumento e retorna HIGH ou LOW
     // A operação |= equivale ao OR atribuindo o valor do resultado a variável. Exemplo: x = 1100; x|=1010 --> x = x OR 1010; x = 1000
     // Operação << desloca N bits para esquerda. Exemplo: A = 00010001; A << 2 --> A = 01000100
+    // A ordem de execução seria primeiro realizar o shift(<<) e depois a atribuição(|=)
     aux |= digitalRead(uart->pin_rx) << i;
     _sw_uart_wait_T(uart);
   }

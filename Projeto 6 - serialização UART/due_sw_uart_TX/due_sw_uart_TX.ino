@@ -1,6 +1,7 @@
 // ARQUIVO PARA REALIZAR O PROCESSO COM AS VARIÁVEIS E FUNÇÕES
 
 #include "sw_uart.h"
+#include "sw_uart.cpp"
 
 due_sw_uart uart;
 
@@ -10,20 +11,11 @@ void setup() {
 }
 
 void loop() {
- receive_byte();
+ send_byte();
  delay(5);
 }
 
 
-void receive_byte() {
-  char data;
-  int code = sw_uart_receive_byte(&uart, &data);
-  if(code == SW_UART_SUCCESS) {
-     Serial.print(data);
-  } else if(code == SW_UART_ERROR_PARITY) {
-    Serial.println("\nPARITY ERROR");
-  } else {
-    Serial.println("\nOTHER");
-    Serial.print(code);
-  }
+void send_byte() {
+  sw_uart_send_byte(&uart, 'a');
 }
