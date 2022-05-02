@@ -5,15 +5,10 @@
 // importação para melhorar compilamento do computador
 #pragma GCC optimize ("-O3")
 
-void sw_uart_setup(due_sw_uart *uart, int tx, int stopbits, int databits, int paritybit) {
-  
+void sw_uart_setup(due_sw_uart *uart, int tx) {
   uart->pin_tx     = tx;
-  uart->stopbits   = stopbits;
-  uart->paritybit  = paritybit;
-  uart->databits   = databits;
   pinMode(tx, INPUT); 
 }
-
 
 
 int calc_even_parity(char data) {

@@ -7,10 +7,6 @@
 
 struct due_sw_uart {
 	int pin_tx;
-	int baudrate;
-	int stopbits;
-	int paritybit;
-  int databits;
 };
 
 typedef struct due_sw_uart due_sw_uart;
@@ -23,8 +19,8 @@ typedef struct due_sw_uart due_sw_uart;
 #define SW_UART_EVEN_PARITY 	2
 
 
-void sw_uart_setup(due_sw_uart *uart, int tx,  int stopbits, int databits, int paritybit);
-int  sw_uart_receive_byte(due_sw_uart *uart, char* data);
+void sw_uart_setup(due_sw_uart *uart, int tx);
+void sw_uart_send_byte(due_sw_uart *uart);
 
 void _sw_uart_wait_half_T(due_sw_uart *uart);
 void _sw_uart_wait_T(due_sw_uart *uart);
