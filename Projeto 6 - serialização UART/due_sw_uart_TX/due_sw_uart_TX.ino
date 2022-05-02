@@ -15,7 +15,6 @@ void loop() {
  delay(5);
 }
 
-
 void send_byte() {
-  sw_uart_send_byte(&uart, 'a');
+  sw_uart_send_byte(&uart);
 }

@@ -6,7 +6,7 @@
 #include <Arduino.h>
 
 struct due_sw_uart {
-	int pin_rx;
+	int pin_tx;
 	int baudrate;
 	int stopbits;
 	int paritybit;
@@ -23,7 +23,7 @@ typedef struct due_sw_uart due_sw_uart;
 #define SW_UART_EVEN_PARITY 	2
 
 
-void sw_uart_setup(due_sw_uart *uart, int rx,  int stopbits, int databits, int paritybit);
+void sw_uart_setup(due_sw_uart *uart, int tx,  int stopbits, int databits, int paritybit);
 int  sw_uart_receive_byte(due_sw_uart *uart, char* data);
 
 void _sw_uart_wait_half_T(due_sw_uart *uart);

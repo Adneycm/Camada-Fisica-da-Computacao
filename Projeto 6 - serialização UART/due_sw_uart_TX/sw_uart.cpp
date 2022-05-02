@@ -5,73 +5,72 @@
 // importação para melhorar compilamento do computador
 #pragma GCC optimize ("-O3")
 
-void sw_uart_setup(due_sw_uart *uart, int rx, int stopbits, int databits, int paritybit) {
-	
-	uart->pin_rx     = rx;
-	uart->stopbits   = stopbits;
-	uart->paritybit  = paritybit;
-  uart->databits   = databits;
-  pinMode(rx, INPUT);
+void sw_uart_setup(due_sw_uart *uart, int tx, int stopbits, int databits, int paritybit) {
   
+  uart->pin_tx     = tx;
+  uart->stopbits   = stopbits;
+  uart->paritybit  = paritybit;
+  uart->databits   = databits;
+  pinMode(tx, INPUT); 
 }
+
 
 
 int calc_even_parity(char data) {
   int ones = 0;
-
   for(int i = 0; i < 8; i++) {
     ones += (data >> i) & 0x01;
   }
-
   return ones % 2;
 }
 
-sw_uart_send_byte(due_sw_uart *uart, char* data) {
+void sw_uart_send_byte(due_sw_uart *uart) {
   
   // Primeiro vamos deixar o sinal em alto por 5 vezes o período de um bit
   for(int i = 0; i < 1093*10; i++) {
     digitalWrite(4, HIGH);
+    asm("NOP");
   }
   
   // Agora vamos baixar o sinal para mandar o "start bit"
-  digitalWrite(uart->pin_rx, LOW);
+  digitalWrite(uart->pin_tx, LOW);
   _sw_uart_wait_T(uart);
   
   // Agora o server está esperando a mensagem, então vamos enviá-la
-  char aux = 0x00000000;
-  for(int i = 0; i < 8; i++) {
-    digitalWrite(uart->pin_rx, LOW);
-    _sw_uart_wait_T(uart);
+  digitalWrite(uart->pin_tx, LOW);
+  _sw_uart_wait_T(uart);
 
-    digitalWrite(uart->pin_rx, HIGH);
-    _sw_uart_wait_T(uart);
+  digitalWrite(uart->pin_tx, HIGH);
+  _sw_uart_wait_T(uart);
 
-    digitalWrite(uart->pin_rx, HIGH);
-    _sw_uart_wait_T(uart);
+  digitalWrite(uart->pin_tx, HIGH);
+  _sw_uart_wait_T(uart);
 
-    digitalWrite(uart->pin_rx, LOW);
-    _sw_uart_wait_T(uart);
+  digitalWrite(uart->pin_tx, LOW);
+  _sw_uart_wait_T(uart);
 
-    digitalWrite(uart->pin_rx, LOW);
-    _sw_uart_wait_T(uart);
+  digitalWrite(uart->pin_tx, LOW);
+  _sw_uart_wait_T(uart);
 
-    digitalWrite(uart->pin_rx, LOW);
-    _sw_uart_wait_T(uart);
+  digitalWrite(uart->pin_tx, LOW);
+  _sw_uart_wait_T(uart);
 
-    digitalWrite(uart->pin_rx, LOW);
-    _sw_uart_wait_T(uart);
+  digitalWrite(uart->pin_tx, LOW);
+  _sw_uart_wait_T(uart);
 
-    digitalWrite(uart->pin_rx, HIGH);
-    _sw_uart_wait_T(uart);
-  }
+  digitalWrite(uart->pin_tx, HIGH);
+  _sw_uart_wait_T(uart);
+  
 
   // Enviada a mensagem é necessário agora enviar o bit de paridade
+  // a = 01100001 --> em hexadecimal = 0x61
+  char data = 0x61;
   int bitParidade = calc_even_parity(data);
-  digitalWrite(uart->pin_rx, bitParidade);
+  digitalWrite(uart->pin_tx, bitParidade);
   _sw_uart_wait_T(uart);
 
   // Feito isso já teremos enviado todo o necessário, faltando apenas o stopbit
-  digitalWrite(uart->pin_rx, HIGH);
+  digitalWrite(uart->pin_tx, HIGH);
   _sw_uart_wait_T(uart);
   
   // Mensagem enviada!!
