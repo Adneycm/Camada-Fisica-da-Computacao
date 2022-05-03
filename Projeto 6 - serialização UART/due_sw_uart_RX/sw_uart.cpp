@@ -44,7 +44,7 @@ int sw_uart_receive_byte(due_sw_uart *uart, char* data) {
   // Saindo do while no sabemos que a msg vai chegar, entretanto é preciso esperar meio periodo para confirmar se o "start bit" é realmente 0 ou se houve um erro
   // Após esperar esse meio periodo de bit e confirmado que o sinal é 0, é preciso esperar mais um período completo de bit para medirmos exatamente no meio do próximo
   // bit(que já será o primeiro bit da mensagem) e evitar a medição de tensões erradas na subida ou descida do sinal.
-  Serial.println("\nchegou byte");
+  //Serial.println("\nchegou byte");
   // confirm start bit
   _sw_uart_wait_half_T(uart);
   // HIGH = invalid

@@ -19,11 +19,11 @@ int calc_even_parity(char data) {
   return ones % 2;
 }
 
-void sw_uart_send_byte(due_sw_uart *uart) {
+void sw_uart_send_byte(due_sw_uart *uart, char data) {
   
   // Primeiro vamos deixar o sinal em alto por 5 vezes o período de um bit
   for(int i = 0; i < 1093*10; i++) {
-    digitalWrite(4, HIGH);
+    digitalWrite(uart->pin_tx, HIGH);
     asm("NOP");
   }
   
@@ -32,34 +32,12 @@ void sw_uart_send_byte(due_sw_uart *uart) {
   _sw_uart_wait_T(uart);
   
   // Agora o server está esperando a mensagem, então vamos enviá-la
-  digitalWrite(uart->pin_tx, LOW);
-  _sw_uart_wait_T(uart);
-
-  digitalWrite(uart->pin_tx, HIGH);
-  _sw_uart_wait_T(uart);
-
-  digitalWrite(uart->pin_tx, HIGH);
-  _sw_uart_wait_T(uart);
-
-  digitalWrite(uart->pin_tx, LOW);
-  _sw_uart_wait_T(uart);
-
-  digitalWrite(uart->pin_tx, LOW);
-  _sw_uart_wait_T(uart);
-
-  digitalWrite(uart->pin_tx, LOW);
-  _sw_uart_wait_T(uart);
-
-  digitalWrite(uart->pin_tx, LOW);
-  _sw_uart_wait_T(uart);
-
-  digitalWrite(uart->pin_tx, HIGH);
-  _sw_uart_wait_T(uart);
-  
+  for (int i=0; i<8; i++){
+    digitalWrite(uart->pin_tx,(data >> i) & 0x01);
+    _sw_uart_wait_T(uart);  
+  }
 
   // Enviada a mensagem é necessário agora enviar o bit de paridade
-  // a = 01100001 --> em hexadecimal = 0x61
-  char data = 0x61;
   int bitParidade = calc_even_parity(data);
   digitalWrite(uart->pin_tx, bitParidade);
   _sw_uart_wait_T(uart);

@@ -1,7 +1,6 @@
 // ARQUIVO PARA REALIZAR O PROCESSO COM AS VARIÁVEIS E FUNÇÕES
 
 #include "sw_uart.h"
-#include "sw_uart.cpp"
 
 due_sw_uart uart;
 
@@ -16,5 +15,6 @@ void loop() {
 }
 
 void send_byte() {
-  sw_uart_send_byte(&uart);
+  sw_uart_send_byte(&uart,'a');
+  Serial.println("MENSAGEM ENVIADA");
 }

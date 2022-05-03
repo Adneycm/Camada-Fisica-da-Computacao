@@ -20,7 +20,7 @@ typedef struct due_sw_uart due_sw_uart;
 
 
 void sw_uart_setup(due_sw_uart *uart, int tx);
-void sw_uart_send_byte(due_sw_uart *uart);
+void sw_uart_send_byte(due_sw_uart *uart, char data);
 
 void _sw_uart_wait_half_T(due_sw_uart *uart);
 void _sw_uart_wait_T(due_sw_uart *uart);
