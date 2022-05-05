@@ -22,6 +22,11 @@ int calc_even_parity(char data) {
 void sw_uart_send_byte(due_sw_uart *uart, char data) {
   // Primeiro vamos deixar o sinal em alto por 5 vezes o período de um bit
   digitalWrite(uart->pin_tx, HIGH);
+  _sw_uart_wait_T(uart);
+  _sw_uart_wait_T(uart);
+  _sw_uart_wait_T(uart);
+  _sw_uart_wait_T(uart);
+  _sw_uart_wait_T(uart);
   
   // Agora vamos baixar o sinal para mandar o "start bit"
   digitalWrite(uart->pin_tx, LOW);
