@@ -1,17 +1,14 @@
-// ARQUIVO PARA DECLARAÇÃO DE VARIÁVEIS
-
 #ifndef SW_UART_HEADER
 #define SW_UART_HEADER
 
 #include <Arduino.h>
 
-// Construção da structure due_sw_uart que recebe como parâmetros: pin_rx, baudrate, stopbits, paritybit, databits
 struct due_sw_uart {
-	int pin_rx;    // pino de recepção no arduino
-	int baudrate;  // baudrate é o número de vezes em um segundo que um sinal em um canal de comunicação muda.
-	int stopbits;  // bit de parada, sinaliza o fim da mensagem
-	int paritybit; // bit de paridade
-  int databits;  // mensagem de fato(similar ao payload)
+	int pin_rx;
+	int baudrate;
+	int stopbits;
+	int paritybit;
+  	int databits;
 };
 
 typedef struct due_sw_uart due_sw_uart;

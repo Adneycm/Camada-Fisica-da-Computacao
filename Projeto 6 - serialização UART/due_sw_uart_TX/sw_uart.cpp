@@ -7,7 +7,7 @@
 
 void sw_uart_setup(due_sw_uart *uart, int tx) {
   uart->pin_tx     = tx;
-  pinMode(tx, INPUT); 
+  pinMode(tx, OUTPUT); 
 }
 
 
@@ -22,10 +22,7 @@ int calc_even_parity(char data) {
 void sw_uart_send_byte(due_sw_uart *uart, char data) {
   
   // Primeiro vamos deixar o sinal em alto por 5 vezes o período de um bit
-  for(int i = 0; i < 1093*10; i++) {
-    digitalWrite(uart->pin_tx, HIGH);
-    asm("NOP");
-  }
+  digitalWrite(uart->pin_tx, HIGH);
   
   // Agora vamos baixar o sinal para mandar o "start bit"
   digitalWrite(uart->pin_tx, LOW);
