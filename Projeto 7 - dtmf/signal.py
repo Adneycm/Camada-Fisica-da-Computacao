@@ -3,7 +3,7 @@ import numpy as np
 import sounddevice as sd
 #import matplotlib.pyplot as plt
 from scipy.fftpack import fft
-#from scipy import signal as window
+from scipy import signal as window
 import sys
 
 
@@ -12,9 +12,9 @@ class Signal:
         self.signal = []
         self.button = ''
         self.fs = 44100
-        self.time = 3
+        self.time = 4
         self.x = []
-        self.s = []
+        self.signal = []
         self.DTMF = {'0': (1339, 941),
                      '1': (1206, 697),
                      '2': (1339, 697),
@@ -38,23 +38,23 @@ class Signal:
     def generateSin(self):
         n = self.time*self.fs #numero de pontos
         self.x = np.linspace(0.0, self.time, n)  # eixo do tempo
-        self.s = (
+        self.signal = (
                   np.sin(self.DTMF[self.button][0]*self.x*2*np.pi), 
                   np.sin(self.DTMF[self.button][1]*self.x*2*np.pi)
                   )
 
     #função para calcular transformada de fourier
-    def calcFFT(self, signal, fs):
+    def calcFFT(self, audio):
         # https://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html
-        N  = len(signal)
+        N  = len(audio)
         W = window.hamming(N)
-        T  = 1/fs
+        T  = 1/self.fs
         xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
-        yf = fft(signal*W)
+        yf = fft(audio*W)
         return(xf, np.abs(yf[0:N//2]))
 
-    # def plotFFT(self, signal, fs):
-    #     x,y = self.calcFFT(signal, fs)
+    # def plotFFT(self):
+    #     x,y = self.calcFFT(self.signal, self.fs)
     #     plt.figure()
     #     plt.plot(x, np.abs(y))
     #     plt.title('Fourier')

@@ -1,10 +1,7 @@
 
 #importe as bibliotecas
 from signal import Signal
-import numpy as np
 import sounddevice as sd
-#import matplotlib.pyplot as plt
-
 
 def main():
     
@@ -29,17 +26,13 @@ def main():
     print(f"O botão '{encoder.button}' possui as seguintes freqências na tabela DTMF: {encoder.DTMF[encoder.button]}\n")
     encoder.generateSin()
     print(f"Tocando tom referente a tecla '{encoder.button}'")
-    sd.play(encoder.s[0], encoder.fs)
-    sd.play(encoder.s[1], encoder.fs)
+    sd.play(encoder.signal[0], encoder.fs)
+    sd.play(encoder.signal[1], encoder.fs)
     #plt.show()
     sd.wait()
 
-
     # Exibe gráficos
-    # plt.show()
-    # # aguarda fim do audio
-    # sd.wait()
-    # plotFFT(self, signal, fs)
+    #encoder.plotFFT()
     
 
 if __name__ == "__main__":
