@@ -1,24 +1,11 @@
 
 #importe as bibliotecas
-from signal import Signal
+from index import Signal
 import sounddevice as sd
+import matplotlib.pyplot as plt
+import numpy as np
 
 def main():
-    
-    #********************************************instruções*********************************************** 
-    # seu objetivo aqui é gerar duas senoides. Cada uma com frequencia corresposndente à tecla pressionada
-    # então inicialmente peça ao usuário para digitar uma tecla do teclado numérico DTMF
-    # agora, voce tem que gerar, por alguns segundos, suficiente para a outra aplicação gravar o audio, duas senoides com as frequencias corresposndentes à tecla pressionada, segundo a tabela DTMF
-    # se voce quiser, pode usar a funcao de construção de senoides existente na biblioteca de apoio cedida. Para isso, você terá que entender como ela funciona e o que são os argumentos.
-    # essas senoides tem que ter taxa de amostragem de 44100 amostras por segundo, entao voce tera que gerar uma lista de tempo correspondente a isso e entao gerar as senoides
-    # lembre-se que a senoide pode ser construída com A*sin(2*pi*f*t)
-    # o tamanho da lista tempo estará associada à duração do som. A intensidade é controlada pela constante A (amplitude da senoide). Seja razoável.
-    # some as senoides. A soma será o sinal a ser emitido.
-    # utilize a funcao da biblioteca sounddevice para reproduzir o som. Entenda seus argumento.
-    # grave o som com seu celular ou qualquer outro microfone. Cuidado, algumas placas de som não gravam sons gerados por elas mesmas. (Isso evita microfonia).
-    
-    # construa o gráfico do sinal emitido e o gráfico da transformada de Fourier. Cuidado. Como as frequencias sao relativamente altas, voce deve plotar apenas alguns pontos (alguns periodos) para conseguirmos ver o sinal
-    
 
     print("----- Inicializando encoder -----\n")
     encoder = Signal()
@@ -26,14 +13,21 @@ def main():
     print(f"O botão '{encoder.button}' possui as seguintes freqências na tabela DTMF: {encoder.DTMF[encoder.button]}\n")
     encoder.generateSin()
     print(f"Tocando tom referente a tecla '{encoder.button}'")
+    audio = encoder.signal[0] + encoder.signal[1]
     sd.play(encoder.signal[0], encoder.fs)
     sd.play(encoder.signal[1], encoder.fs)
-    #plt.show()
     sd.wait()
 
     # Exibe gráficos
-    #encoder.plotFFT()
-    
+    plt.figure(figsize=(25,10))
+    plt.plot(encoder.t, encoder.signal[0], label=f"Senoide de f={encoder.DTMF[encoder.button][0]}")
+    plt.plot(encoder.t, encoder.signal[1], label=f"Senoide de f={encoder.DTMF[encoder.button][1]}")
+    plt.plot(encoder.t, audio, label="Soma das senoides")
+    plt.xlabel("Tempo (s)", fontsize = 18)
+    plt.ylabel("Amplitude", fontsize = 18)
+    plt.legend(loc='upper right', fontsize=18)
+    plt.axis([1, 1.01, -2, 2])
+    plt.show()
 
 if __name__ == "__main__":
     main()
