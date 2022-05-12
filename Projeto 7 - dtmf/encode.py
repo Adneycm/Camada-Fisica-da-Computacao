@@ -14,8 +14,7 @@ def main():
     encoder.generateSin()
     print(f"Tocando tom referente a tecla '{encoder.button}'")
     audio = encoder.signal[0] + encoder.signal[1]
-    sd.play(encoder.signal[0], encoder.fs)
-    sd.play(encoder.signal[1], encoder.fs)
+    sd.play(encoder.signal[0] + encoder.signal[1], encoder.fs)
     sd.wait()
 
     # Exibe gráficos
@@ -23,6 +22,7 @@ def main():
     plt.plot(encoder.t, encoder.signal[0], label=f"Senoide de f={encoder.DTMF[encoder.button][0]}")
     plt.plot(encoder.t, encoder.signal[1], label=f"Senoide de f={encoder.DTMF[encoder.button][1]}")
     plt.plot(encoder.t, audio, label="Soma das senoides")
+    plt.title(f"Tecla {encoder.button}")
     plt.xlabel("Tempo (s)", fontsize = 18)
     plt.ylabel("Amplitude", fontsize = 18)
     plt.legend(loc='upper right', fontsize=18)

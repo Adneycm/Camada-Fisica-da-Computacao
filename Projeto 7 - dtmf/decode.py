@@ -48,14 +48,15 @@ def main():
     # Calcula e exibe o Fourier do sinal audio. como saida tem-se a amplitude e as frequencias
     xf, yf = decoder.calcFFT(audio[:,0])
 
-    decoder.plotFFT(audio[:,0])
+    #decoder.plotFFT(audio[:,0])
   
-    peaks = peakutils.indexes(yf,thres=0.5, min_dist=300)
+    peaks = peakutils.indexes(yf,thres=0.2, min_dist=300)
     print(f"TODOS OS PICOS DO EIXO Y: {peaks}")
     peaks_x = peakutils.interpolate(xf, yf, ind=peaks)
     print(f"picos em x:{peaks_x}, quantidade:{len(peaks_x)}")
 
     print(decoder.closerFrequency(peaks_x))
+    decoder.plotFFT(audio[:,0])
     
     #printe os picos encontrados!
     

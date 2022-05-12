@@ -13,7 +13,7 @@ class Signal:
         self.signal = []
         self.button = ''
         self.fs = 44100
-        self.time = 4
+        self.time = 7
         self.n = self.time*self.fs # número de pontos
         self.t = np.linspace(0.0, self.time, self.n) # eixo do tempo
         self.DTMF = {'0': (1339, 941),
@@ -34,6 +34,7 @@ class Signal:
                      '#': (1477, 941)}
 
         self.uniqueTons = [1206, 1339, 1477, 1633, 697, 770, 852, 941]
+        self.tecla = ''
 
      #* METÓDOS
 
@@ -59,12 +60,11 @@ class Signal:
         x,y = self.calcFFT(audio)
         plt.figure(figsize=(25,10))
         plt.plot(x, y)
-        plt.title('Fourier Transform')
+        plt.title(f'Fourier Transform (tecla = {self.tecla}')
         plt.xlabel('Frequencies')
         plt.ylabel('Amplitude')
         #plt.xlim(0,1500)
         #plt.axis([0, 1500, 0, 0.0001])
-        plt.axvline(x=710, ymin=0, ymax=400, color='r')
         plt.show()
 
     def closerFrequency(self,peaks):
@@ -86,12 +86,14 @@ class Signal:
                     segundoTonCerto = ton
 
         ton = [tonCerto, segundoTonCerto]
+        print(ton)
         list_of_key = list(self.DTMF.keys())
         list_of_value = list(self.DTMF.values())
 
         for tecla in self.DTMF.values():
             if sorted(ton) == sorted(list(tecla)):
                 position = list_of_value.index(tecla)
+                self.tecla = list_of_key[position]
                 return f"A tecla apertada foi a {list_of_key[position]}"
 
     #função para interromper programa
