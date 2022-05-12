@@ -60,7 +60,7 @@ class Signal:
         x,y = self.calcFFT(audio)
         plt.figure(figsize=(25,10))
         plt.plot(x, y)
-        plt.title(f'Fourier Transform (tecla = {self.tecla}')
+        plt.title(f'Fourier Transform (tecla = {self.tecla})')
         plt.xlabel('Frequencies')
         plt.ylabel('Amplitude')
         #plt.xlim(0,1500)
