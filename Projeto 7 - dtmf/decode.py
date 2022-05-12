@@ -32,6 +32,7 @@ def main():
     audio = sd.rec(int(duration*decoder.fs), decoder.fs, channels=1)
     sd.wait()
     print("Gravação concluída\n")
+
     plt.figure(figsize=(25,10))
     x = np.linspace(0.0, duration, duration*decoder.fs)
     plt.plot(x, audio)
@@ -45,18 +46,18 @@ def main():
     #grave uma variavel com apenas a parte que interessa (dados)
 
     # Calcula e exibe o Fourier do sinal audio. como saida tem-se a amplitude e as frequencias
-    xf, yf = decoder.plotFFT(audio)
-    
-    cb = np.array([d[0] for d in np.abs(yf)])
+    xf, yf = decoder.calcFFT(audio[:,0])
+
+    decoder.plotFFT(audio[:,0])
   
-    peaks = peakutils.indexes(cb,thres=0.8, min_dist=300)
-    peaks_x = peakutils.interpolate(xf, cb, ind=peaks)
+    peaks = peakutils.indexes(yf,thres=0.5, min_dist=300)
+    print(f"TODOS OS PICOS DO EIXO Y: {peaks}")
+    peaks_x = peakutils.interpolate(xf, yf, ind=peaks)
     print(f"picos em x:{peaks_x}, quantidade:{len(peaks_x)}")
 
-    ton1, ton2 = decoder.closerFrequency(peaks_x)
-    print(ton1, ton2)
+    print(decoder.closerFrequency(peaks_x))
     
-    #printe os picos encontrados! 
+    #printe os picos encontrados!
     
     #encontre na tabela duas frequencias proximas às frequencias de pico encontradas e descubra qual foi a tecla
     #print a tecla.

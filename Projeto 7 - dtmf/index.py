@@ -47,39 +47,34 @@ class Signal:
     #função para calcular transformada de fourier
     def calcFFT(self, audio):
         # # https://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html
-        # N  = len(audio)
-        # W = window.hamming(N)
-        # T  = 1/self.fs
-        # xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
-        # yf = fft(audio*W)
-        # return(xf, np.abs(yf[0:N//2]))
-        ###################################################
         N  = len(audio)
+        W = window.hamming(N)
         T  = 1/self.fs
-        xf = np.linspace(-1.0/(2.0*T), 1.0/(2.0*T), N)
-        yf = fft(audio)
-        return(xf, fftshift(yf))
+        xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
+        yf = fft(audio*W)
+        return(xf, np.abs(yf[0:N//2]))
+
 
     def plotFFT(self, audio):
         x,y = self.calcFFT(audio)
-        print(len(x),len(y))
         plt.figure(figsize=(25,10))
-        plt.plot(x, np.abs(y))
+        plt.plot(x, y)
         plt.title('Fourier Transform')
         plt.xlabel('Frequencies')
         plt.ylabel('Amplitude')
         #plt.xlim(0,1500)
-        plt.axis([0, 1500, 0, 0.0001])
+        #plt.axis([0, 1500, 0, 0.0001])
+        plt.axvline(x=710, ymin=0, ymax=400, color='r')
         plt.show()
-        return x, y
 
-    def closerFrequency(self, peaks):
+    def closerFrequency(self,peaks):
+        uniqueTons = [1206, 1339, 1477, 1633, 697, 770, 852, 941]
         menorDelta = 20
         segundoMenorDelta = 20
         tonCerto = 0
         segundoTonCerto = 0
         for peak in peaks:
-            for ton in self.uniqueTons:
+            for ton in uniqueTons:
                 delta = abs(peak - ton)
                 if delta <= menorDelta:
                     menorDelta = delta
@@ -90,7 +85,14 @@ class Signal:
                     segundoMenorDelta = delta
                     segundoTonCerto = ton
 
-        return tonCerto, segundoTonCerto
+        ton = [tonCerto, segundoTonCerto]
+        list_of_key = list(self.DTMF.keys())
+        list_of_value = list(self.DTMF.values())
+
+        for tecla in self.DTMF.values():
+            if sorted(ton) == sorted(list(tecla)):
+                position = list_of_value.index(tecla)
+                return f"A tecla apertada foi a {list_of_key[position]}"
 
     #função para interromper programa
     def signal_handler(signal, frame):
