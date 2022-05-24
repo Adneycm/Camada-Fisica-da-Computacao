@@ -33,6 +33,11 @@ def main():
     #lendo arquivo de áudio gerado pelo encode
     audio, samplerate = sf.read('signalTransmition.wav')
 
+    #emitindo som áudio gerado pelo encode
+    print("Emitindo som do áudio modulado")
+    sd.play(audio, decoder.fs)
+    sd.wait()
+
     #demodulando áudio com transmissora de 13.000Hz
     print("Demodulando áudio\n")
     audioDemodulado = decoder.signalPortadora*audio

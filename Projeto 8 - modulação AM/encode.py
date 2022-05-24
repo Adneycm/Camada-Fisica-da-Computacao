@@ -46,6 +46,11 @@ def main():
     #modulando áudio com transmissora de 13.000Hz
     audioModulado = encoder.signalPortadora*audioFiltrado
 
+    #emitindo som áudio modulado
+    print("Emitindo som do áudio modulado")
+    sd.play(audioModulado, encoder.fs)
+    sd.wait()
+
     #normalizando áudio (dividir pela amplitude)
     audioNormalizado = encoder.normalizeSignal(audioModulado)
     encoder.plot(audioNormalizado, 'modulado e normalizado')
