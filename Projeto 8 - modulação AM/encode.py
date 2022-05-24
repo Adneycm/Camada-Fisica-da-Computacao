@@ -1,10 +1,12 @@
 
 #importe as bibliotecas
+from sympy import N
 from index import Signal
 import sounddevice as sd
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import soundfile as sf
 
 def main():
 
@@ -28,15 +30,16 @@ def main():
     sd.wait()
     print("Gravação concluída\n")
 
-    #filtro do áudio
+    #filtrando áudio
     print("Iniciando tratamento do áudio\n")
-
-    encoder.plotFFT(audio[:,0])
+    encoder.plotFFT(audio[:,0], 'sem filtro')
 
     audioFiltrado = encoder.LPF(audio[:,0], 2500)
-    encoder.plotFFT(audioFiltrado)
+    encoder.plot(audioFiltrado, 'filtrado')
+    encoder.plotFFT(audioFiltrado, 'filtrado')
 
-    #áudio filtrado
+    #emitindo som áudio filtrado
+    print("Emitindo som do áudio filtrado")
     sd.play(audioFiltrado, encoder.fs)
     sd.wait()
 
@@ -45,7 +48,12 @@ def main():
 
     #normalizando áudio (dividir pela amplitude)
     audioNormalizado = encoder.normalizeSignal(audioModulado)
-    encoder.plotFFT(audioNormalizado)
+    encoder.plot(audioNormalizado, 'modulado e normalizado')
+    encoder.plotFFT(audioNormalizado, 'modulado e normalizado')
+
+    #criando arquivo de áudio
+    sf.write('signalTransmition.wav', audioNormalizado, encoder.fs)
+
 
 if __name__ == "__main__":
     main()

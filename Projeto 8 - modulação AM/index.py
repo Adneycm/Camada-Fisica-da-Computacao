@@ -13,9 +13,8 @@ class Signal:
       self.time = 5
       self.n = self.time*self.fs #numero de pontos
       self.freqPortadora = 13000
-      self.x = np.linspace(0.0, self.time, self.n)  # eixo do tempo
-      self.signalPortadora = np.sin(self.freqPortadora*self.x*2*np.pi)
-      
+      self.t = np.linspace(0.0, self.time, self.n)  # eixo do tempo
+      self.signalPortadora = np.sin(self.freqPortadora*self.t*2*np.pi)      
 
     #função para interromper programa
     def signal_handler(signal, frame):
@@ -38,19 +37,25 @@ class Signal:
         return(xf, np.abs(yf[0:N//2]))
 
 
-    def plotFFT(self, audio):
-        x,y = self.calcFFT(audio)
-        plt.figure(figsize=(25,10))
-        plt.plot(x, y)
-        plt.axvline(x=2500, ymin=0, ymax=4, color='r')
-        plt.axvline(x=10500, ymin=0, ymax=4, color='r')
-        plt.axvline(x=15500, ymin=0, ymax=4, color='r')
-        plt.title(f'Fourier Transform')
-        plt.xlabel('Frequencies')
-        plt.ylabel('Amplitude')
-        #plt.xlim(0,1500)
-        #plt.axis([0, 1500, 0, 0.0001])
-        plt.show()
+    def plotFFT(self, audio, title):
+      x,y = self.calcFFT(audio)
+      plt.figure(figsize=(25,10))
+      plt.plot(x, y)
+      plt.axvline(x=2500, ymin=0, ymax=4, color='r')
+      plt.axvline(x=10500, ymin=0, ymax=4, color='r')
+      plt.axvline(x=15500, ymin=0, ymax=4, color='r')
+      plt.title(f'Sinal de áudio {title} - domínio da frequência')
+      plt.xlabel('Frequencies')
+      plt.ylabel('Amplitude')
+      plt.show()
+
+    def plot(self, audio, title):
+      plt.figure(figsize=(25,10))
+      plt.plot(self.t, audio)
+      plt.title(f'Sinal de áudio {title} - domínio do tempo')
+      plt.xlabel('Tempo')
+      plt.ylabel('Amplitude')
+      plt.show()
 
     def filtro(y, samplerate, cutoff_hz):
       # https://scipy.github.io/old-wiki/pages/Cookbook/FIRFilter.html
