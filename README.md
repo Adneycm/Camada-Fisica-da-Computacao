@@ -11,6 +11,9 @@
 
 #### Descrição de cada projeto:
 * Projeto 1 - loop back
+
+  Neste projeto o objetivo foi construir um código em Python para transmissão e recepção serial simultâneas. Para realizar o projeto foi necessário conectar um       jumper entre os pinos RX e TX para que o microcontrolador fosse um "espelho" para os bytes enviados. Foi necessário também conectar o arduino ao computador por     meio de um cabo USB. A transmissão funcioanava portanto da seguinte maneira: primeiro o computador enviava uma série de bytes, via cabo USB, para o pino RX do       arduino que por sua vez transmitia para o pino TX, via jumper conectado; ao chegar no pino TX os bytes eram enviados novamente para o computador. Para realizar o   teste foi enviado uma imagem de 100x100 pixels. Segue abaixo foto da montagem correta do circuito:
+
 * Projeto 2 - client server com tempo real
 * Projeto 3 - datagrama
 * Projeto 4 - protocolo ponto a ponto
